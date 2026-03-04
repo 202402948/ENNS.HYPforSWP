@@ -12,12 +12,14 @@
             --card-bg: #ffffff;
             --border-color: #dddddd;
             --accent-color: #e74c3c;
+            --btn-hover-bg: #f0f0f0;
         }
         body.dark-mode {
             --bg-color: #121212;
             --text-color: #f4f7f6;
             --card-bg: #1e1e1e;
             --border-color: #333333;
+            --btn-hover-bg: #2a2a2a;
         }
 
         body {
@@ -29,7 +31,7 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
-        /* 뉴스 전광판 (속도 느리게 수정: 80s) */
+        /* 뉴스 전광판 */
         .news-ticker {
             background-color: var(--card-bg);
             padding: 10px 0;
@@ -40,7 +42,7 @@
         .ticker-content {
             display: inline-block;
             padding-left: 100%;
-            animation: ticker 80s linear infinite; /* 속도 2배 느리게 */
+            animation: ticker 80s linear infinite;
             font-weight: bold;
         }
         .ticker-content span {
@@ -51,7 +53,7 @@
             100% { transform: translate(-100%, 0); }
         }
 
-        /* 레이아웃 */
+        /* 메인 레이아웃 */
         .container { max-width: 1300px; margin: 20px auto; padding: 0 20px; }
         .header { text-align: center; margin-bottom: 20px; }
         #current-time { font-size: 0.9em; color: #888; }
@@ -64,14 +66,14 @@
             border: 1px solid var(--border-color);
         }
 
-        /* 전문가형 2단 분리 대시보드 레이아웃 */
+        /* 2단 분리 대시보드 레이아웃 */
         .dashboard-layout {
             display: flex;
             gap: 20px;
             align-items: flex-start;
         }
 
-        /* 좌측 주식 리스트 패널 */
+        /* 좌측 주식 리스트 */
         .stock-sidebar {
             width: 300px;
             flex-shrink: 0;
@@ -87,11 +89,9 @@
             flex-direction: column;
             gap: 10px;
         }
-        /* 스크롤바 디자인 */
         .stock-list-container::-webkit-scrollbar { width: 6px; }
         .stock-list-container::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; }
 
-        /* 개별 미니 시세표 항목 */
         .stock-item {
             position: relative;
             cursor: pointer;
@@ -101,16 +101,15 @@
             background: var(--bg-color);
         }
         .stock-item.active {
-            border-color: var(--accent-color); /* 선택된 종목 강조 */
+            border-color: var(--accent-color);
             box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
         }
         .stock-item-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; /* 클릭 인식을 위해 위젯을 투명하게 덮음 */
+            z-index: 10;
         }
 
-        /* 전체보기 버튼 */
         #toggle-stocks-btn {
             background-color: var(--card-bg);
             border: 1px dashed #888;
@@ -121,21 +120,53 @@
             font-weight: bold;
             width: 100%;
         }
-        #toggle-stocks-btn:hover { background-color: rgba(0,0,0,0.05); }
+        #toggle-stocks-btn:hover { background-color: var(--btn-hover-bg); }
 
-        /* 우측 메인 차트 */
-        #chart-container { 
-            flex-grow: 1; 
-            height: 550px; 
-            min-width: 0; 
+        /* 메인 차트 영역 헤더 */
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .chart-header h2 { margin: 0; }
+        
+        /* 고급 차트 전환 버튼 */
+        #toggle-chart-mode-btn {
+            background-color: transparent;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #toggle-chart-mode-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
         }
 
-        /* 반응형 모바일 (화면이 작아지면 리스트를 위로 올림) */
+        /* 메인 차트 컨테이너 */
+        #chart-container { 
+            height: 500px; 
+            width: 100%; 
+        }
+        
+        /* 우측 메인 영역 래퍼 */
+        .main-chart-area {
+            flex-grow: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
         @media (max-width: 900px) {
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
             .stock-list-container { flex-direction: row; overflow-x: auto; max-height: 120px; padding-bottom: 10px; }
             .stock-item { min-width: 250px; }
+            .chart-header { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
 
         /* 하단 뉴스 리스트 */
@@ -168,7 +199,7 @@
 
     <div class="news-ticker">
         <div class="ticker-content" id="ticker-text">
-            <span>최신 경제 뉴스를 불러오는 중입니다... 잠시만 기다려주세요.</span>
+            <span>최신 경제 뉴스를 불러오는 중입니다...</span>
         </div>
     </div>
 
@@ -181,16 +212,19 @@
         </div>
 
         <div class="card">
-            <h2 style="margin-top:0;">📊 실시간 증시 현황 및 주가 차트</h2>
-            
             <div class="dashboard-layout">
                 <div class="stock-sidebar">
-                    <div class="stock-list-container" id="stock-list">
-                        </div>
+                    <div class="stock-list-container" id="stock-list"></div>
                     <button id="toggle-stocks-btn">➕ 주식 정보 전체보기</button>
                 </div>
 
-                <div id="chart-container"></div>
+                <div class="main-chart-area">
+                    <div class="chart-header">
+                        <h2>📊 실시간 증시 현황 및 주가 차트</h2>
+                        <button id="toggle-chart-mode-btn">🔍 고급 차트 보기</button>
+                    </div>
+                    <div id="chart-container"></div>
+                </div>
             </div>
         </div>
 
@@ -211,6 +245,7 @@
         let isDarkMode = false;
         let currentSymbol = 'NASDAQ:NVDA';
         let showAllStocks = false;
+        let chartMode = 'mini'; // 'mini' (기본) 또는 'advanced' (고급 캔들 차트)
 
         const allStocks = [
             { symbol: 'NASDAQ:NVDA' },
@@ -233,7 +268,7 @@
         }
         setInterval(updateTime, 1000); updateTime();
 
-        // 1. 좌측 미니 시세표 리스트 생성
+        // 좌측 미니 시세표 리스트
         function setupStockList() {
             const container = document.getElementById('stock-list');
             container.innerHTML = ''; 
@@ -244,16 +279,14 @@
             displayStocks.forEach(stock => {
                 const item = document.createElement('div');
                 item.className = 'stock-item';
-                item.dataset.symbol = stock.symbol; // 식별자 저장
+                item.dataset.symbol = stock.symbol;
                 if(stock.symbol === currentSymbol) item.classList.add('active');
 
-                // 클릭 인식을 위한 투명 막(Overlay)
                 const overlay = document.createElement('div');
                 overlay.className = 'stock-item-overlay';
                 overlay.onclick = () => { setActiveStock(stock.symbol); };
                 item.appendChild(overlay);
 
-                // 트레이딩뷰 미니 시세(Single Quote) 위젯
                 const widgetDiv = document.createElement('div');
                 const script = document.createElement('script');
                 script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
@@ -267,16 +300,12 @@
                 });
                 widgetDiv.appendChild(script);
                 item.appendChild(widgetDiv);
-
                 container.appendChild(item);
             });
         }
 
-        // 2. 활성화된 종목 표시 변경 및 차트 렌더링
         function setActiveStock(symbol) {
             currentSymbol = symbol;
-            
-            // 리스트 테두리 색상(active 클래스) 업데이트
             document.querySelectorAll('.stock-item').forEach(item => {
                 if(item.dataset.symbol === symbol) {
                     item.classList.add('active');
@@ -284,37 +313,69 @@
                     item.classList.remove('active');
                 }
             });
-            
             renderChart(currentSymbol);
         }
 
-        // 3. 우측 메인 차트 렌더링 (한국식 색상 적용)
+        // 메인 차트 렌더링 (애플 튕김 현상 수정 완료!)
         function renderChart(symbol) {
             const container = document.getElementById('chart-container');
             container.innerHTML = ''; 
             const themeStr = isDarkMode ? "dark" : "light";
             const script = document.createElement('script');
-            script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+            
+            if (chartMode === 'advanced') {
+                // 고급 캔들 차트
+                script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+                script.innerHTML = JSON.stringify({
+                    "autosize": true,
+                    "symbol": symbol,
+                    "interval": "D",
+                    "timezone": "Asia/Seoul",
+                    "theme": themeStr,
+                    "style": "1",
+                    "locale": "kr",
+                    "enable_publishing": false,
+                    "hide_top_toolbar": false,
+                    "hide_legend": false,
+                    "save_image": false,
+                    "studies_overrides": {
+                        "volume.volume.color.0": "#0000ff",
+                        "volume.volume.color.1": "#ff0000"
+                    }
+                });
+            } else {
+                // 미니 차트 (한국 주식도 완벽하게 지원하는 위젯으로 교체!)
+                script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
+                script.innerHTML = JSON.stringify({
+                    "symbol": symbol,
+                    "width": "100%",
+                    "height": "100%",
+                    "locale": "kr",
+                    "dateRange": "12M",
+                    "colorTheme": themeStr,
+                    "isTransparent": true,
+                    "autosize": true,
+                    "largeChartUrl": ""
+                });
+            }
+            
             script.async = true;
-            script.innerHTML = JSON.stringify({
-                "autosize": true,
-                "symbol": symbol,
-                "interval": "D",
-                "timezone": "Asia/Seoul",
-                "theme": themeStr,
-                "style": "1",
-                "locale": "kr",
-                "enable_publishing": false,
-                "hide_top_toolbar": false,
-                "hide_legend": false,
-                "save_image": false,
-                "studies_overrides": {
-                    "volume.volume.color.0": "#0000ff", // 하락(파랑)
-                    "volume.volume.color.1": "#ff0000"  // 상승(빨강)
-                }
-            });
             container.appendChild(script);
+
+            // 버튼 텍스트 업데이트
+            const modeBtn = document.getElementById('toggle-chart-mode-btn');
+            if (chartMode === 'advanced') {
+                modeBtn.innerText = "📉 기본(미니) 차트 보기";
+            } else {
+                modeBtn.innerText = "🔍 고급 차트 보기";
+            }
         }
+
+        // 차트 모드 토글 버튼 이벤트
+        document.getElementById('toggle-chart-mode-btn').addEventListener('click', () => {
+            chartMode = (chartMode === 'mini') ? 'advanced' : 'mini';
+            renderChart(currentSymbol);
+        });
 
         // 환율 위젯
         function renderExchangeWidget() {
@@ -334,7 +395,7 @@
             container.appendChild(script);
         }
 
-        // 뉴스 로딩 (구글 경제)
+        // 뉴스 로딩
         function loadNews() {
             const rssUrl = 'https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko';
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -359,20 +420,19 @@
                 .catch(error => console.error('뉴스 실패:', error));
         }
 
-        // 이벤트 리스너: 전체보기 버튼
+        // 전체보기 버튼
         document.getElementById('toggle-stocks-btn').addEventListener('click', (e) => {
             showAllStocks = !showAllStocks;
             e.target.innerText = showAllStocks ? "➖ 주식 정보 접기" : "➕ 주식 정보 전체보기";
-            setupStockList(); // 리스트 다시 그리기
+            setupStockList();
         });
 
-        // 이벤트 리스너: 테마 및 새로고침
+        // 테마 및 새로고침
         document.getElementById('theme-btn').addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             document.body.classList.toggle('dark-mode', isDarkMode);
             document.getElementById('theme-btn').innerText = isDarkMode ? "☀️" : "🌙";
             
-            // 테마가 바뀌면 모든 위젯을 다시 그려야 함
             setupStockList(); 
             renderChart(currentSymbol);
             renderExchangeWidget();
