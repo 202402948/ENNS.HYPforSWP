@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>글로벌 IT & 경제 실시간 대시보드</title>
     <style>
+        /* 따뜻한 손글씨 폰트 불러오기 */
+        @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
+
         /* 테마 변수 설정 */
         :root {
             --bg-color: #f4f7f6;
@@ -154,19 +157,20 @@
             border-color: #5a2c2c;
         }
 
+        /* 손글씨 폰트 및 기울임체 제거 적용 완료! */
         .quote-text {
-            font-size: 1.3em;
-            font-style: normal;
+            font-size: 1.8em; 
+            font-style: normal; /* 기울임체 제거 */
             color: var(--text-color);
             margin-bottom: 15px;
             line-height: 1.6;
-            font-family: '궁서', 'Gungsuh', serif; 
+            font-family: 'Nanum Pen Script', cursive; /* 따뜻한 손글씨 폰트 */
             transition: all 0.3s;
         }
         .quote-author {
-            font-size: 1.1em;
+            font-size: 1.3em;
             color: #7f8c8d;
-            font-weight: bold;
+            font-family: 'Nanum Pen Script', cursive; /* 작성자도 손글씨 폰트로 통일 */
             transition: all 0.3s;
         }
         body.dark-mode .quote-author { color: #aab7b8; }
@@ -372,9 +376,8 @@
                 quoteCard.classList.add('birthday-mode');
                 textEl.innerHTML = "🎉 아빠 생신 축하해요!! 즐겁고 멋진 하루 보내세요 ♥ 🎉";
                 textEl.style.color = "var(--accent-color)";
-                textEl.style.fontStyle = "normal";
                 textEl.style.fontWeight = "bold";
-                textEl.style.fontSize = "1.6em";
+                textEl.style.fontSize = "2.2em"; // 생일 메시지는 더 크게!
                 
                 authorEl.innerText = "- 사랑하는 딸 올림 -";
                 authorEl.style.color = "var(--accent-color)";
@@ -390,9 +393,8 @@
             // 혹시 생일이 지나고 다음날 접속했을 때 원래대로 되돌리기 위한 설정
             quoteCard.classList.remove('birthday-mode');
             textEl.style.color = "";
-            textEl.style.fontStyle = "italic";
             textEl.style.fontWeight = "normal";
-            textEl.style.fontSize = "1.3em";
+            textEl.style.fontSize = "1.8em";
 
             textEl.innerText = `"${selectedQuote.text}"`;
             authorEl.innerText = `- ${selectedQuote.author} -`;
