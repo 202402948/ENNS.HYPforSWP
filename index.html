@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>글로벌 IT & 경제 실시간 대시보드</title>
+    <title>아빠를 위한 글로벌 IT & 경제 실시간 대시보드</title>
     <style>
         /* 테마 변수 설정 */
         :root {
@@ -106,29 +106,6 @@
         .company-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; }
         .company-news-list a:hover { color: var(--accent-color); }
 
-        /* 📱 모바일(휴대폰) 완벽 최적화 📱 */
-        @media (max-width: 900px) {
-            .dashboard-layout { flex-direction: column; }
-            .stock-sidebar { width: 100%; }
-            
-            .stock-list-container { 
-                flex-direction: row; 
-                overflow-x: auto; 
-                max-height: none; 
-                padding-bottom: 15px; 
-                scroll-snap-type: x mandatory; 
-                -webkit-overflow-scrolling: touch; 
-            }
-            .stock-item { 
-                min-width: 280px; 
-                flex-shrink: 0; 
-                scroll-snap-align: start; 
-            }
-            
-            /* [수정 완료] 차트가 모바일에서도 와이드 비율을 유지하도록 높이를 확 줄였습니다! */
-            #chart-container { height: 280px; }
-        }
-
         #global-news-list { list-style: none; padding: 0; margin: 0; }
         #global-news-list li { padding: 15px 0; border-bottom: 1px solid var(--border-color); }
         #global-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
@@ -195,7 +172,7 @@
             100% { transform: translateY(-120vh) scale(1.5) rotate(360deg); opacity: 0; }
         }
 
-        /* 플로팅 UI */
+        /* 🌟 PC & 모바일 하이브리드 환율 UI 🌟 */
         .exchange-wrapper {
             position: fixed; right: 20px; top: 80px; z-index: 1000;
             display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
@@ -213,7 +190,34 @@
             border: 1px solid var(--border-color); transition: opacity 0.3s, transform 0.3s;
         }
         .floating-exchange.hidden { opacity: 0; pointer-events: none; transform: translateY(-10px); }
-        @media (max-width: 1100px) { .exchange-wrapper { display: none; } }
+
+        /* 모바일(휴대폰) 완벽 최적화 */
+        @media (max-width: 900px) {
+            .dashboard-layout { flex-direction: column; }
+            .stock-sidebar { width: 100%; }
+            .stock-list-container { 
+                flex-direction: row; overflow-x: auto; max-height: none; 
+                padding-bottom: 15px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; 
+            }
+            .stock-item { min-width: 280px; flex-shrink: 0; scroll-snap-align: start; }
+            #chart-container { height: 280px; }
+
+            /* 환율창 모바일 최적화: 가리지 않고 깔끔하게 문서 사이에 배치 */
+            .exchange-wrapper {
+                position: static;
+                align-items: stretch;
+                margin-bottom: 20px;
+                width: 100%;
+            }
+            .floating-exchange {
+                width: 100%;
+                box-sizing: border-box;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+            .floating-exchange.hidden {
+                display: none; /* 모바일에서는 부드러운 전환 대신 아예 공간을 없앰 */
+            }
+        }
 
         .floating-controls {
             position: fixed; right: 20px; bottom: 20px;
@@ -236,15 +240,15 @@
         </div>
     </div>
 
-    <div class="exchange-wrapper">
-        <button id="toggle-exchange-btn">💱 환율창 숨기기</button>
-        <div class="floating-exchange" id="exchange-container"></div>
-    </div>
-
     <div class="container">
         <div class="header">
-            <h1>🌐 글로벌 IT 대장주 & 경제 대시보드</h1>
+            <h1>🌐 아빠를 위한 글로벌 IT 대장주 & 경제 대시보드</h1>
             <p id="current-time">대한민국 표준시 로딩 중...</p>
+        </div>
+
+        <div class="exchange-wrapper">
+            <button id="toggle-exchange-btn">💱 환율창 숨기기</button>
+            <div class="floating-exchange" id="exchange-container"></div>
         </div>
 
         <div class="card">
@@ -515,14 +519,11 @@
             container.appendChild(script);
         }
 
-        // 🌟 [핵심 업데이트] 한국 시간(KST) 완벽 보정 로직 적용 🌟
         function formatKoreanTime(pubDateStr) {
-            // API가 주는 날짜(UTC)에 'Z'나 '+' 타임존 표시가 없으면 강제로 UTC(Z)로 인식시킵니다.
             let safeDateStr = pubDateStr;
             if (safeDateStr && !safeDateStr.includes('Z') && !safeDateStr.includes('+')) {
                 safeDateStr = safeDateStr.replace(' ', 'T') + 'Z';
             }
-            
             const dateObj = new Date(safeDateStr);
             const month = dateObj.getMonth() + 1;
             const date = dateObj.getDate();
@@ -574,7 +575,6 @@
                         listEl.innerHTML = '';
                         articles.slice(0, displayCount).forEach(article => {
                             const li = document.createElement('li');
-                            // 한국 시간 변환 함수 사용!
                             const dateStr = formatKoreanTime(article.pubDate);
                             li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
                             listEl.appendChild(li);
@@ -593,9 +593,7 @@
             const newsToShow = allGlobalNews.slice(0, currentlyDisplayedGlobalNews);
             newsToShow.forEach(article => {
                 const li = document.createElement('li');
-                // 한국 시간 변환 함수 사용!
                 const dateStr = formatKoreanTime(article.pubDate);
-                
                 li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
                 newsList.appendChild(li);
             });
