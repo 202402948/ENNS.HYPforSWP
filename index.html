@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>글로벌 IT & 경제 실시간 대시보드</title>
+    <style>
+        /* 기본 라이트 모드 색상 변수 */
+        :root {
+            --bg-color: #f4f7f6;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #dddddd;
+            --accent-color: #e74c3c; /* 상승(한국식 빨강) 느낌 포인트 */
+            --down-color: #0000ff; /* 하락(한국식 파랑) */
+        }
+
+        /* 다크 모드 색상 변수 */
+        body.dark-mode {
+            --bg-color: #121212;
+            --text-color: #f4f7f6;
+            --card-bg: #1e1e1e;
+            --border-color: #333333;
+        }
+
+        body {
+            font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 상단 뉴스 롤링 전광판 */
+        .news-ticker {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            padding: 10px 0;
+            border-bottom: 2px solid var(--border-color);
+            overflow: hidden;
+            white-space: nowrap;
+            position: relative;
+        }
+        .ticker-content {
+            display: inline-block;
+            padding-left: 100%;
+            animation: ticker 30s linear infinite;
+            font-weight: bold;
+        }
+        .ticker-content span {
+            margin-right: 50px;
+        }
+        @keyframes ticker {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+
+        /* 메인 레이아웃 */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* 헤더 및 현재 시간 */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #current-time {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        /* 카드 UI */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* 주식 종목 선택 버튼 (시총 순) */
+        .stock-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+            justify-content: center;
+        }
+        .stock-btn {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 2px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .stock-btn:hover, .stock-btn.active {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        /* 차트 영역 크기 고정 */
+        #chart-container {
+            height: 500px;
+            width: 100%;
+        }
+
+        /* 하단 뉴스 리스트 */
+        #news-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        #news-list li {
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        #news-list a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.1em;
+            transition: color 0.2s;
+        }
+        #news-list a:hover {
+            color: var(--accent-color);
+        }
+
+        /* 플로팅(떠있는) 환율 위젯 */
+        .floating-exchange {
+            position: fixed;
+            right: 20px;
+            top: 80px;
+            width: 250px;
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1000;
+            border: 1px solid var(--border-color);
+        }
+        @media (max-width: 1000px) {
+            .floating-exchange { display: none; /* 모바일 화면에서는 숨김 */ }
+        }
+
+        /* 우측 하단 고정 버튼들 (새로고침, 다크모드) */
+        .floating-controls {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+        .action-btn {
+            background-color: var(--text-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 15px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="news-ticker">
+        <div class="ticker-content" id="ticker-text">
+            <span>뉴스를 불러오는 중입니다... 잠시만 기다려주세요.</span>
+        </div>
+    </div>
+
+    <div class="floating-exchange" id="exchange-container">
+        </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🌐 글로벌 IT 대장주 & 경제 대시보드</h1>
+            <p id="current-time">대한민국 표준시 로딩 중...</p>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-top:0;">📊 실시간 주가 변동 차트</h2>
+            <div class="stock-tabs" id="stock-tabs">
+                </div>
+            <div id="chart-container"></div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-top:0;">📰 최신 경제 뉴스 타임라인</h2>
+            <ul id="news-list">
+                <li>뉴스를 불러오는 중입니다...</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="floating-controls">
+        <button class="action-btn" id="theme-btn" title="다크/라이트 모드 전환">🌙</button>
+        <button class="action-btn" id="refresh-btn" title="데이터 새로고침">🔄</button>
+    </div>
+
+    <script>
+        // --- 1. 설정 및 변수 ---
+        let isDarkMode = false;
+        let currentSymbol = 'NASDAQ:NVDA'; // 기본 접속 시 엔비디아 고정
+
+        // 종목 리스트 (시가총액 순서 배치)
+        const stocks = [
+            { name: '1. 엔비디아', symbol: 'NASDAQ:NVDA' },
+            { name: '2. 테슬라', symbol: 'NASDAQ:TSLA' },
+            { name: '3. SK하이닉스', symbol: 'KRX:000660' },
+            { name: '4. 팔란티어', symbol: 'NYSE:PLTR' },
+            { name: '5. 로켓랩', symbol: 'NASDAQ:RKLB' }
+        ];
+
+        // --- 2. 시간 표시 함수 (대한민국 기준) ---
+        function updateTime() {
+            const now = new Date();
+            const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('current-time').innerText = "기준: " + now.toLocaleString('ko-KR', options);
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // --- 3. 트레이딩뷰 차트 동적 생성 함수 ---
+        // (테마나 종목이 바뀔 때마다 위젯을 새로 그려야 완벽하게 적용됨)
+        function renderChart(symbol) {
+            const container = document.getElementById('chart-container');
+            container.innerHTML = ''; // 기존 차트 지우기
+            
+            const themeStr = isDarkMode ? "dark" : "light";
+            
+            const script = document.createElement('script');
+            script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+            script.async = true;
+            script.innerHTML = JSON.stringify({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "D",
+                "timezone": "Asia/Seoul",
+                "theme": themeStr,
+                "style": "1", // 캔들차트
+                "locale": "kr",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                // 한국식 색상 강제 적용 시도 (지원되는 위젯 환경에 한함)
+                "studies_overrides": {
+                    "volume.volume.color.0": "#0000ff", // 하락 파랑
+                    "volume.volume.color.1": "#ff0000"  // 상승 빨강
+                }
+            });
+            container.appendChild(script);
+        }
+
+        // --- 4. 환율 위젯 동적 생성 함수 ---
+        function renderExchangeWidget() {
+            const container = document.getElementById('exchange-container');
+            container.innerHTML = '<h4 style="margin: 0 0 10px 0;">💱 실시간 환율</h4>';
+            
+            const themeStr = isDarkMode ? "dark" : "light";
+            
+            const script = document.createElement('script');
+            script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js";
+            script.async = true;
+            script.innerHTML = JSON.stringify({
+                "symbol": "FX_IDC:USDKRW", // 원/달러 환율
+                "width": "100%",
+                "isTransparent": true,
+                "colorTheme": themeStr,
+                "locale": "kr"
+            });
+            container.appendChild(script);
+        }
+
+        // --- 5. 버튼 세팅 ---
+        function setupStockButtons() {
+            const tabsContainer = document.getElementById('stock-tabs');
+            tabsContainer.innerHTML = '';
+            
+            stocks.forEach(stock => {
+                const btn = document.createElement('button');
+                btn.className = 'stock-btn' + (stock.symbol === currentSymbol ? ' active' : '');
+                btn.innerText = stock.name;
+                btn.onclick = () => {
+                    currentSymbol = stock.symbol;
+                    setupStockButtons(); // 버튼 색상 업데이트
+                    renderChart(currentSymbol); // 차트 변경
+                };
+                tabsContainer.appendChild(btn);
+            });
+        }
+
+        // --- 6. 실시간 뉴스 가져오기 함수 ---
+        function loadNews() {
+            const rssUrl = 'https://rss.hankyung.com/new/news_economy.xml';
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    const articles = data.items.slice(0, 10);
+                    
+                    // 전광판 뉴스 세팅
+                    const tickerText = articles.map(a => `[속보] ${a.title}`).join(' <span> | </span> ');
+                    document.getElementById('ticker-text').innerHTML = `<span>${tickerText}</span>`;
+
+                    // 하단 리스트 뉴스 세팅
+                    const newsList = document.getElementById('news-list');
+                    newsList.innerHTML = '';
+                    articles.forEach(article => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title}</a>`;
+                        newsList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error('뉴스 로딩 실패:', error);
+                    document.getElementById('ticker-text').innerHTML = '<span>뉴스 데이터를 불러오지 못했습니다.</span>';
+                });
+        }
+
+        // --- 7. 이벤트 리스너 세팅 ---
+        // 테마 변경 버튼
+        document.getElementById('theme-btn').addEventListener('click', () => {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+            document.getElementById('theme-btn').innerText = isDarkMode ? "☀️" : "🌙";
+            
+            // 테마가 바뀌면 차트와 환율 위젯도 해당 테마로 다시 그려줌
+            renderChart(currentSymbol);
+            renderExchangeWidget();
+        });
+
+        // 새로고침 버튼
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            alert("최신 데이터로 업데이트합니다!");
+            loadNews();
+            renderChart(currentSymbol);
+            renderExchangeWidget();
+        });
+
+        // --- 8. 초기 실행 ---
+        setupStockButtons();
+        renderChart(currentSymbol);
+        renderExchangeWidget();
+        loadNews();
+
+    </script>
+</body>
+</html>
