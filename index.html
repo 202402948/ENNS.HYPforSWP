@@ -111,24 +111,22 @@
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
             
-            /* 가로 스와이프 스크롤 적용 */
             .stock-list-container { 
                 flex-direction: row; 
                 overflow-x: auto; 
                 max-height: none; 
                 padding-bottom: 15px; 
                 scroll-snap-type: x mandatory; 
-                -webkit-overflow-scrolling: touch; /* 아이폰 스크롤 부드럽게 */
+                -webkit-overflow-scrolling: touch; 
             }
             .stock-item { 
-                /* 위젯이 좁아져서 퍼센트(%)가 숨겨지는 것을 방지하는 핵심 코드! */
                 min-width: 280px; 
                 flex-shrink: 0; 
                 scroll-snap-align: start; 
             }
             
-            /* 모바일 화면에서 차트가 너무 길면 보기 힘드므로 높이 조절 */
-            #chart-container { height: 400px; }
+            /* [수정 완료] 차트가 모바일에서도 와이드 비율을 유지하도록 높이를 확 줄였습니다! */
+            #chart-container { height: 280px; }
         }
 
         #global-news-list { list-style: none; padding: 0; margin: 0; }
@@ -486,8 +484,6 @@
             document.getElementById('chart-main-title').innerText = `📊 ${stockObj.name} 실시간 차트`;
             
             renderChart(stockObj.symbol);
-            
-            // 뉴스를 불러올 때 가장 안정적이었던 rss2json 방식으로 원상복구 호출
             fetchRealTimeNews(stockObj.keyword, 'company-news-list', 5);
         }
 
@@ -519,7 +515,23 @@
             container.appendChild(script);
         }
 
-        // 🌟 [핵심 복구] 에러 없이 가장 안정적이었던 공식 API(rss2json) 방식으로 되돌림 🌟
+        // 🌟 [핵심 업데이트] 한국 시간(KST) 완벽 보정 로직 적용 🌟
+        function formatKoreanTime(pubDateStr) {
+            // API가 주는 날짜(UTC)에 'Z'나 '+' 타임존 표시가 없으면 강제로 UTC(Z)로 인식시킵니다.
+            let safeDateStr = pubDateStr;
+            if (safeDateStr && !safeDateStr.includes('Z') && !safeDateStr.includes('+')) {
+                safeDateStr = safeDateStr.replace(' ', 'T') + 'Z';
+            }
+            
+            const dateObj = new Date(safeDateStr);
+            const month = dateObj.getMonth() + 1;
+            const date = dateObj.getDate();
+            const hours = String(dateObj.getHours()).padStart(2, '0');
+            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+            
+            return `${month}/${date} ${hours}:${minutes}`;
+        }
+
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
             if(listElementId === 'company-news-list') {
@@ -527,13 +539,12 @@
             }
             listEl.innerHTML = '<li>뉴스를 안전하게 불러오는 중입니다...</li>';
 
-            // 브라우저 캐시 방지용 시간 부착
             const cacheBuster = new Date().getTime();
             let rssUrl = keyword 
                 ? `https://news.google.com/rss/search?q=${encodeURIComponent(keyword + " 주식 OR 경제")}&hl=ko&gl=KR&ceid=KR:ko`
                 : `https://news.google.com/rss/search?q=${encodeURIComponent('경제 OR 증시 OR 금융')}&hl=ko&gl=KR&ceid=KR:ko`;
             
-            rssUrl += `&_=${cacheBuster}`; // 구글 RSS 서버에 새로운 요청임을 알림
+            rssUrl += `&_=${cacheBuster}`; 
 
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
@@ -563,8 +574,8 @@
                         listEl.innerHTML = '';
                         articles.slice(0, displayCount).forEach(article => {
                             const li = document.createElement('li');
-                            const dateObj = new Date(article.pubDate);
-                            const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                            // 한국 시간 변환 함수 사용!
+                            const dateStr = formatKoreanTime(article.pubDate);
                             li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
                             listEl.appendChild(li);
                         });
@@ -582,8 +593,8 @@
             const newsToShow = allGlobalNews.slice(0, currentlyDisplayedGlobalNews);
             newsToShow.forEach(article => {
                 const li = document.createElement('li');
-                const dateObj = new Date(article.pubDate);
-                const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                // 한국 시간 변환 함수 사용!
+                const dateStr = formatKoreanTime(article.pubDate);
                 
                 li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
                 newsList.appendChild(li);
