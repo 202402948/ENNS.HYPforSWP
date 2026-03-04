@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아빠를 위한 글로벌 IT & 경제 실시간 대시보드</title>
+    <title>글로벌 IT & 경제 실시간 대시보드</title>
     <style>
         /* 테마 변수 설정 */
         :root {
@@ -79,12 +79,14 @@
             border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
         .tab-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
+        
         .stock-list-container {
             max-height: 650px; overflow-y: auto; padding-right: 5px;
             display: flex; flex-direction: column; gap: 10px;
         }
-        .stock-list-container::-webkit-scrollbar { width: 6px; }
+        .stock-list-container::-webkit-scrollbar { width: 6px; height: 6px; }
         .stock-list-container::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; }
+        
         .stock-item {
             position: relative; cursor: pointer; border: 3px solid transparent;
             border-radius: 8px; transition: border-color 0.2s; background: var(--bg-color);
@@ -104,11 +106,29 @@
         .company-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; }
         .company-news-list a:hover { color: var(--accent-color); }
 
+        /* 📱 모바일(휴대폰) 완벽 최적화 📱 */
         @media (max-width: 900px) {
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
-            .stock-list-container { flex-direction: row; overflow-x: auto; max-height: 140px; padding-bottom: 10px; }
-            .stock-item { min-width: 250px; }
+            
+            /* 가로 스와이프 스크롤 적용 */
+            .stock-list-container { 
+                flex-direction: row; 
+                overflow-x: auto; 
+                max-height: none; 
+                padding-bottom: 15px; 
+                scroll-snap-type: x mandatory; 
+                -webkit-overflow-scrolling: touch; /* 아이폰 스크롤 부드럽게 */
+            }
+            .stock-item { 
+                /* 위젯이 좁아져서 퍼센트(%)가 숨겨지는 것을 방지하는 핵심 코드! */
+                min-width: 280px; 
+                flex-shrink: 0; 
+                scroll-snap-align: start; 
+            }
+            
+            /* 모바일 화면에서 차트가 너무 길면 보기 힘드므로 높이 조절 */
+            #chart-container { height: 400px; }
         }
 
         #global-news-list { list-style: none; padding: 0; margin: 0; }
@@ -214,7 +234,7 @@
 
     <div class="news-ticker">
         <div class="ticker-content" id="ticker-text">
-            <span>최신 경제 뉴스를 실시간으로 수집하고 있습니다...</span>
+            <span>최신 경제 뉴스를 불러오고 있습니다... 잠시만 기다려주세요.</span>
         </div>
     </div>
 
@@ -225,7 +245,7 @@
 
     <div class="container">
         <div class="header">
-            <h1>아빠를 위한 글로벌 IT 대장주 & 경제 대시보드</h1>
+            <h1>🌐 글로벌 IT 대장주 & 경제 대시보드</h1>
             <p id="current-time">대한민국 표준시 로딩 중...</p>
         </div>
 
@@ -258,7 +278,7 @@
         <div class="card">
             <h2 style="margin-top:0;">📰 글로벌 경제 시황 타임라인</h2>
             <ul id="global-news-list">
-                <li>뉴스를 실시간으로 분석 중입니다...</li>
+                <li>뉴스를 안전하게 불러오는 중입니다...</li>
             </ul>
             <button class="load-more-btn" id="load-more-news-btn" style="display: none;">📰 더 많은 경제 뉴스 펼쳐보기</button>
         </div>
@@ -333,7 +353,7 @@
             { text: "새로운 시작을 두려워하지 마세요. 당신의 경험이라는 나침반이 가장 정확한 길을 안내할 것입니다.", author: "작자 미상" },
             { text: "인생은 속도가 아니라 방향입니다. 이제는 마음이 이끄는 방향으로 걸어가세요.", author: "괴테" },
             { text: "수십 년의 성실함으로 지어 올린 당신의 인생은 그 어떤 빌딩보다 견고하고 아름답습니다.", author: "작자 미상" },
-            { text: "은퇴는 직업에서 물러나는 것이 아니라, 진정한 나 자신으로 나아가는 위대한 첫걸음입니다.", author: "작자 미상" },
+            { text: "은퇴는 직업에서 물러나는 가장 빛나는 첫걸음입니다.", author: "작자 미상" },
             { text: "매일 아침 눈을 뜨는 것이 기대되는 삶, 그것이 당신이 맞이할 인생의 두 번째 봄입니다.", author: "작자 미상" },
             { text: "과거를 자랑스러워하고, 현재를 즐기며, 미래를 기대하십시오. 당신은 충분히 그럴 자격이 있습니다.", author: "작자 미상" },
             { text: "인생의 해질녘이 일출보다 아름다운 이유는, 하루 종일 품었던 따뜻한 온기를 머금고 있기 때문입니다.", author: "작자 미상" },
@@ -343,7 +363,6 @@
             { text: "당신의 존재 자체가 우리 가족의 가장 큰 축복이자 자랑입니다. 앞으로의 매일이 축제이길 바랍니다.", author: "가족 일동" }
         ];
 
-        // 🌟 2026년 ~ 2056년 (총 31년 치) 아버님 음력 1월 28일 완벽 변환표 🌟
         const lunarBirthdayToSolar = {
             2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02",
             2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07",
@@ -467,6 +486,8 @@
             document.getElementById('chart-main-title').innerText = `📊 ${stockObj.name} 실시간 차트`;
             
             renderChart(stockObj.symbol);
+            
+            // 뉴스를 불러올 때 가장 안정적이었던 rss2json 방식으로 원상복구 호출
             fetchRealTimeNews(stockObj.keyword, 'company-news-list', 5);
         }
 
@@ -498,38 +519,30 @@
             container.appendChild(script);
         }
 
-        // 🌟 [핵심 업데이트] 이중 우회(Dual-Proxy) 기술이 적용된 막힘없는 뉴스 수집 로직 🌟
+        // 🌟 [핵심 복구] 에러 없이 가장 안정적이었던 공식 API(rss2json) 방식으로 되돌림 🌟
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
             if(listElementId === 'company-news-list') {
                 document.getElementById('company-news-title').innerText = `📰 ${keyword} 최근 관련 뉴스`;
             }
-            listEl.innerHTML = '<li>진짜 실시간 뉴스를 긁어오는 중입니다... 잠시만 기다려주세요!</li>';
+            listEl.innerHTML = '<li>뉴스를 안전하게 불러오는 중입니다...</li>';
 
+            // 브라우저 캐시 방지용 시간 부착
             const cacheBuster = new Date().getTime();
             let rssUrl = keyword 
-                ? `https://news.google.com/rss/search?q=${encodeURIComponent(keyword + " 주식 OR 경제")}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`
-                : `https://news.google.com/rss/search?q=${encodeURIComponent('경제 OR 증시 OR 금융')}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`;
+                ? `https://news.google.com/rss/search?q=${encodeURIComponent(keyword + " 주식 OR 경제")}&hl=ko&gl=KR&ceid=KR:ko`
+                : `https://news.google.com/rss/search?q=${encodeURIComponent('경제 OR 증시 OR 금융')}&hl=ko&gl=KR&ceid=KR:ko`;
+            
+            rssUrl += `&_=${cacheBuster}`; // 구글 RSS 서버에 새로운 요청임을 알림
 
-            // 1순위와 2순위 예비 우회 서버 주소
-            const proxy1 = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`;
-            const proxy2 = `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`;
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
-            // 1순위 서버 먼저 찌르기
-            fetch(proxy1)
-                .then(res => { if(!res.ok) throw new Error(); return res.text(); })
-                // 1순위 실패 시 2순위 서버로 재시도 (이중 우회)
-                .catch(() => fetch(proxy2).then(res => { if(!res.ok) throw new Error(); return res.text(); }))
-                .then(xmlString => {
-                    const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
-                    const items = xmlDoc.querySelectorAll("item");
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status !== "ok") throw new Error("API 오류");
                     
-                    const articles = Array.from(items).map(item => ({
-                        title: item.querySelector("title") ? item.querySelector("title").textContent : "제목 없음",
-                        link: item.querySelector("link") ? item.querySelector("link").textContent : "#",
-                        pubDate: item.querySelector("pubDate") ? item.querySelector("pubDate").textContent : new Date().toISOString()
-                    }));
+                    const articles = data.items;
 
                     if(articles.length === 0) {
                         listEl.innerHTML = '<li>관련 뉴스가 없습니다.</li>';
@@ -540,7 +553,7 @@
                         allGlobalNews = articles; 
                         renderGlobalNewsList();
                         
-                        const tickerText = articles.slice(0, 15).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
+                        const tickerText = articles.slice(0, 10).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
                         document.getElementById('ticker-text').innerHTML = `<span>${tickerText}</span>`;
                         
                         if(allGlobalNews.length > currentlyDisplayedGlobalNews) {
@@ -558,7 +571,7 @@
                     }
                 })
                 .catch(error => {
-                    listEl.innerHTML = '<li>서버 접속자가 너무 많아 지연되고 있습니다. 화면 우측 하단의 새로고침(🔄)을 다시 눌러주세요.</li>';
+                    listEl.innerHTML = '<li>뉴스 로딩에 실패했습니다. 화면 우측 하단의 새로고침(🔄)을 눌러주세요.</li>';
                 });
         }
 
