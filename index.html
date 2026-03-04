@@ -73,16 +73,15 @@
             align-items: flex-start;
         }
 
-        /* 좌측 주식 리스트 */
+        /* 좌측 주식 리스트 (전체 노출 & 스크롤) */
         .stock-sidebar {
             width: 300px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
-            gap: 15px;
         }
         .stock-list-container {
-            max-height: 500px;
+            max-height: 600px;
             overflow-y: auto;
             padding-right: 5px;
             display: flex;
@@ -110,63 +109,21 @@
             z-index: 10;
         }
 
-        #toggle-stocks-btn {
-            background-color: var(--card-bg);
-            border: 1px dashed #888;
-            color: var(--text-color);
-            padding: 10px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-        }
-        #toggle-stocks-btn:hover { background-color: var(--btn-hover-bg); }
-
-        /* 메인 차트 영역 헤더 */
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .chart-header h2 { margin: 0; }
-        
-        /* 고급 차트 전환 버튼 */
-        #toggle-chart-mode-btn {
-            background-color: transparent;
-            border: 2px solid var(--border-color);
-            color: var(--text-color);
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        #toggle-chart-mode-btn:hover {
-            border-color: var(--accent-color);
-            color: var(--accent-color);
-        }
-
-        /* 메인 차트 컨테이너 */
-        #chart-container { 
-            height: 500px; 
-            width: 100%; 
-        }
-        
-        /* 우측 메인 영역 래퍼 */
+        /* 우측 메인 차트 영역 */
         .main-chart-area {
             flex-grow: 1;
             min-width: 0;
             display: flex;
             flex-direction: column;
         }
+        .chart-header h2 { margin: 0 0 15px 0; }
+        #chart-container { height: 600px; width: 100%; }
 
         @media (max-width: 900px) {
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
             .stock-list-container { flex-direction: row; overflow-x: auto; max-height: 120px; padding-bottom: 10px; }
             .stock-item { min-width: 250px; }
-            .chart-header { flex-direction: column; align-items: flex-start; gap: 10px; }
         }
 
         /* 하단 뉴스 리스트 */
@@ -174,16 +131,41 @@
         #news-list li { padding: 15px 0; border-bottom: 1px solid var(--border-color); }
         #news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
         #news-list a:hover { color: var(--accent-color); }
-
-        /* 플로팅 UI */
-        .floating-exchange {
-            position: fixed; right: 20px; top: 80px; width: 250px;
-            background: var(--card-bg); padding: 10px; border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 1000;
-            border: 1px solid var(--border-color);
+        
+        .load-more-btn {
+            display: block; width: 100%; padding: 12px; margin-top: 15px;
+            background-color: transparent; border: 2px solid var(--border-color);
+            color: var(--text-color); font-weight: bold; border-radius: 8px;
+            cursor: pointer; transition: 0.2s; text-align: center;
         }
-        @media (max-width: 1100px) { .floating-exchange { display: none; } }
+        .load-more-btn:hover { background-color: var(--btn-hover-bg); color: var(--accent-color); border-color: var(--accent-color); }
 
+        /* 플로팅 환율 UI & 토글 버튼 */
+        .exchange-wrapper {
+            position: fixed; right: 20px; top: 80px; z-index: 1000;
+            display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+        }
+        #toggle-exchange-btn {
+            background-color: var(--card-bg); color: var(--text-color);
+            border: 1px solid var(--border-color); padding: 8px 15px;
+            border-radius: 20px; cursor: pointer; font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s;
+        }
+        #toggle-exchange-btn:hover { background-color: var(--btn-hover-bg); }
+        
+        .floating-exchange {
+            width: 250px; background: var(--card-bg); padding: 10px;
+            border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+        .floating-exchange.hidden {
+            opacity: 0; pointer-events: none; transform: translateY(-10px);
+        }
+        
+        @media (max-width: 1100px) { .exchange-wrapper { display: none; } }
+
+        /* 우측 하단 고정 제어 버튼 */
         .floating-controls {
             position: fixed; right: 20px; bottom: 20px;
             display: flex; flex-direction: column; gap: 10px; z-index: 1000;
@@ -203,7 +185,10 @@
         </div>
     </div>
 
-    <div class="floating-exchange" id="exchange-container"></div>
+    <div class="exchange-wrapper">
+        <button id="toggle-exchange-btn">💱 환율창 숨기기</button>
+        <div class="floating-exchange" id="exchange-container"></div>
+    </div>
 
     <div class="container">
         <div class="header">
@@ -214,14 +199,13 @@
         <div class="card">
             <div class="dashboard-layout">
                 <div class="stock-sidebar">
+                    <h3 style="margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">관심 종목 시세</h3>
                     <div class="stock-list-container" id="stock-list"></div>
-                    <button id="toggle-stocks-btn">➕ 주식 정보 전체보기</button>
                 </div>
 
                 <div class="main-chart-area">
                     <div class="chart-header">
-                        <h2>📊 실시간 증시 현황 및 주가 차트</h2>
-                        <button id="toggle-chart-mode-btn">🔍 고급 차트 보기</button>
+                        <h2>📊 실시간 증시 현황 (고급 차트)</h2>
                     </div>
                     <div id="chart-container"></div>
                 </div>
@@ -233,6 +217,7 @@
             <ul id="news-list">
                 <li>뉴스를 불러오는 중입니다...</li>
             </ul>
+            <button class="load-more-btn" id="load-more-news-btn" style="display: none;">📰 더 많은 뉴스 펼쳐보기</button>
         </div>
     </div>
 
@@ -244,9 +229,13 @@
     <script>
         let isDarkMode = false;
         let currentSymbol = 'NASDAQ:NVDA';
-        let showAllStocks = false;
-        let chartMode = 'mini'; // 'mini' (기본) 또는 'advanced' (고급 캔들 차트)
+        let isExchangeVisible = true;
+        
+        // 뉴스 데이터 저장용 배열
+        let allNewsItems = [];
+        let currentlyDisplayedNews = 5;
 
+        // 전체 주식 목록
         const allStocks = [
             { symbol: 'NASDAQ:NVDA' },
             { symbol: 'NASDAQ:TSLA' },
@@ -261,6 +250,7 @@
             { symbol: 'KRX:005930' } // 삼성전자
         ];
 
+        // 시계 업데이트
         function updateTime() {
             const now = new Date();
             const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -268,15 +258,13 @@
         }
         setInterval(updateTime, 1000); updateTime();
 
-        // 좌측 미니 시세표 리스트
+        // 좌측 미니 시세표 리스트 (전체 렌더링)
         function setupStockList() {
             const container = document.getElementById('stock-list');
             container.innerHTML = ''; 
-            
-            const displayStocks = showAllStocks ? allStocks : allStocks.slice(0, 5);
             const themeStr = isDarkMode ? "dark" : "light";
             
-            displayStocks.forEach(stock => {
+            allStocks.forEach(stock => {
                 const item = document.createElement('div');
                 item.className = 'stock-item';
                 item.dataset.symbol = stock.symbol;
@@ -304,6 +292,7 @@
             });
         }
 
+        // 종목 클릭 시
         function setActiveStock(symbol) {
             currentSymbol = symbol;
             document.querySelectorAll('.stock-item').forEach(item => {
@@ -316,66 +305,35 @@
             renderChart(currentSymbol);
         }
 
-        // 메인 차트 렌더링 (애플 튕김 현상 수정 완료!)
+        // 메인 차트 렌더링 (국내 주식 지원을 위해 '고급 차트'로 고정)
         function renderChart(symbol) {
             const container = document.getElementById('chart-container');
             container.innerHTML = ''; 
             const themeStr = isDarkMode ? "dark" : "light";
             const script = document.createElement('script');
             
-            if (chartMode === 'advanced') {
-                // 고급 캔들 차트
-                script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
-                script.innerHTML = JSON.stringify({
-                    "autosize": true,
-                    "symbol": symbol,
-                    "interval": "D",
-                    "timezone": "Asia/Seoul",
-                    "theme": themeStr,
-                    "style": "1",
-                    "locale": "kr",
-                    "enable_publishing": false,
-                    "hide_top_toolbar": false,
-                    "hide_legend": false,
-                    "save_image": false,
-                    "studies_overrides": {
-                        "volume.volume.color.0": "#0000ff",
-                        "volume.volume.color.1": "#ff0000"
-                    }
-                });
-            } else {
-                // 미니 차트 (한국 주식도 완벽하게 지원하는 위젯으로 교체!)
-                script.src = "https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js";
-                script.innerHTML = JSON.stringify({
-                    "symbol": symbol,
-                    "width": "100%",
-                    "height": "100%",
-                    "locale": "kr",
-                    "dateRange": "12M",
-                    "colorTheme": themeStr,
-                    "isTransparent": true,
-                    "autosize": true,
-                    "largeChartUrl": ""
-                });
-            }
+            script.src = "https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js";
+            script.innerHTML = JSON.stringify({
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "D",
+                "timezone": "Asia/Seoul",
+                "theme": themeStr,
+                "style": "1",
+                "locale": "kr",
+                "enable_publishing": false,
+                "hide_top_toolbar": false,
+                "hide_legend": false,
+                "save_image": false,
+                "studies_overrides": {
+                    "volume.volume.color.0": "#0000ff", // 하락 파랑
+                    "volume.volume.color.1": "#ff0000"  // 상승 빨강
+                }
+            });
             
             script.async = true;
             container.appendChild(script);
-
-            // 버튼 텍스트 업데이트
-            const modeBtn = document.getElementById('toggle-chart-mode-btn');
-            if (chartMode === 'advanced') {
-                modeBtn.innerText = "📉 기본(미니) 차트 보기";
-            } else {
-                modeBtn.innerText = "🔍 고급 차트 보기";
-            }
         }
-
-        // 차트 모드 토글 버튼 이벤트
-        document.getElementById('toggle-chart-mode-btn').addEventListener('click', () => {
-            chartMode = (chartMode === 'mini') ? 'advanced' : 'mini';
-            renderChart(currentSymbol);
-        });
 
         // 환율 위젯
         function renderExchangeWidget() {
@@ -395,7 +353,22 @@
             container.appendChild(script);
         }
 
-        // 뉴스 로딩
+        // 환율 위젯 숨기기/열기 토글
+        document.getElementById('toggle-exchange-btn').addEventListener('click', () => {
+            isExchangeVisible = !isExchangeVisible;
+            const container = document.getElementById('exchange-container');
+            const btn = document.getElementById('toggle-exchange-btn');
+            
+            if(isExchangeVisible) {
+                container.classList.remove('hidden');
+                btn.innerText = "💱 환율창 숨기기";
+            } else {
+                container.classList.add('hidden');
+                btn.innerText = "💱 환율창 열기";
+            }
+        });
+
+        // 뉴스 로딩 및 더 보기 기능
         function loadNews() {
             const rssUrl = 'https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko';
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -404,27 +377,46 @@
                 .then(response => response.json())
                 .then(data => {
                     if(data.status !== "ok") throw new Error("API 오류");
-                    const articles = data.items.slice(0, 10);
                     
-                    const tickerText = articles.map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
+                    // 전체 뉴스를 저장
+                    allNewsItems = data.items;
+                    currentlyDisplayedNews = 5; // 처음엔 5개만
+                    
+                    // 전광판 세팅 (10개 정도만 롤링)
+                    const tickerText = allNewsItems.slice(0, 10).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
                     document.getElementById('ticker-text').innerHTML = `<span>${tickerText}</span>`;
 
-                    const newsList = document.getElementById('news-list');
-                    newsList.innerHTML = '';
-                    articles.forEach(article => {
-                        const li = document.createElement('li');
-                        li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title}</a>`;
-                        newsList.appendChild(li);
-                    });
+                    renderNewsList();
+                    
+                    // 뉴스가 5개 이상이면 '더 보기' 버튼 표시
+                    if(allNewsItems.length > 5) {
+                        document.getElementById('load-more-news-btn').style.display = 'block';
+                    }
                 })
                 .catch(error => console.error('뉴스 실패:', error));
         }
 
-        // 전체보기 버튼
-        document.getElementById('toggle-stocks-btn').addEventListener('click', (e) => {
-            showAllStocks = !showAllStocks;
-            e.target.innerText = showAllStocks ? "➖ 주식 정보 접기" : "➕ 주식 정보 전체보기";
-            setupStockList();
+        function renderNewsList() {
+            const newsList = document.getElementById('news-list');
+            newsList.innerHTML = '';
+            
+            const newsToShow = allNewsItems.slice(0, currentlyDisplayedNews);
+            newsToShow.forEach(article => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title}</a>`;
+                newsList.appendChild(li);
+            });
+        }
+
+        // 뉴스 더 보기 버튼 이벤트
+        document.getElementById('load-more-news-btn').addEventListener('click', (e) => {
+            currentlyDisplayedNews += 10; // 누를 때마다 10개씩 추가 표시
+            renderNewsList();
+            
+            // 더 이상 보여줄 뉴스가 없으면 버튼 숨기기
+            if(currentlyDisplayedNews >= allNewsItems.length) {
+                e.target.style.display = 'none';
+            }
         });
 
         // 테마 및 새로고침
