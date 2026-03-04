@@ -345,36 +345,12 @@
 
         // 🌟 2026년 ~ 2056년 (총 31년 치) 아버님 음력 1월 28일 완벽 변환표 🌟
         const lunarBirthdayToSolar = {
-            2026: "03-16",
-            2027: "03-05",
-            2028: "02-22",
-            2029: "03-12",
-            2030: "03-02",
-            2031: "02-19",
-            2032: "03-09",
-            2033: "02-27",
-            2034: "03-18",
-            2035: "03-07",
-            2036: "02-24",
-            2037: "03-14",
-            2038: "03-03",
-            2039: "02-20",
-            2040: "03-10",
-            2041: "02-28",
-            2042: "02-18",
-            2043: "03-09",
-            2044: "02-26",
-            2045: "03-16",
-            2046: "03-05",
-            2047: "02-22",
-            2048: "03-12",
-            2049: "03-01",
-            2050: "02-19",
-            2051: "03-10",
-            2052: "02-28",
-            2053: "03-18",
-            2054: "03-07",
-            2055: "02-24",
+            2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02",
+            2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07",
+            2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10",
+            2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16",
+            2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19",
+            2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24",
             2056: "03-13"
         };
 
@@ -491,8 +467,6 @@
             document.getElementById('chart-main-title').innerText = `📊 ${stockObj.name} 실시간 차트`;
             
             renderChart(stockObj.symbol);
-            
-            // 뉴스를 가져올 때 꼼수 부리지 못하도록 '직접 분해(DOMParser)' 로직 호출
             fetchRealTimeNews(stockObj.keyword, 'company-news-list', 5);
         }
 
@@ -524,40 +498,37 @@
             container.appendChild(script);
         }
 
-        // 🌟 [핵심 업데이트] 무료 API의 캐시 꼼수를 막고 XML을 직접 해석하는 최강의 뉴스 수집기 🌟
+        // 🌟 [핵심 업데이트] 이중 우회(Dual-Proxy) 기술이 적용된 막힘없는 뉴스 수집 로직 🌟
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
             if(listElementId === 'company-news-list') {
                 document.getElementById('company-news-title').innerText = `📰 ${keyword} 최근 관련 뉴스`;
             }
-            listEl.innerHTML = '<li>진짜 실시간 뉴스를 긁어오는 중입니다...</li>';
+            listEl.innerHTML = '<li>진짜 실시간 뉴스를 긁어오는 중입니다... 잠시만 기다려주세요!</li>';
 
             const cacheBuster = new Date().getTime();
-            let rssUrl = '';
-            
-            if(keyword) {
-                const searchKeyword = encodeURIComponent(keyword + " 주식 OR 경제");
-                rssUrl = `https://news.google.com/rss/search?q=${searchKeyword}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`;
-            } else {
-                const searchKeyword = encodeURIComponent('경제 OR 증시 OR 금융');
-                rssUrl = `https://news.google.com/rss/search?q=${searchKeyword}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`;
-            }
+            let rssUrl = keyword 
+                ? `https://news.google.com/rss/search?q=${encodeURIComponent(keyword + " 주식 OR 경제")}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`
+                : `https://news.google.com/rss/search?q=${encodeURIComponent('경제 OR 증시 OR 금융')}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`;
 
-            // rss2json 대신, 원본 데이터를 통째로 뚫어주는 allorigins 프록시 사용!
-            const proxyUrl = `https://api.allorigins.win/get?disableCache=true&url=${encodeURIComponent(rssUrl)}`;
+            // 1순위와 2순위 예비 우회 서버 주소
+            const proxy1 = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`;
+            const proxy2 = `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`;
 
-            fetch(proxyUrl)
-                .then(response => response.json())
-                .then(data => {
-                    // 구글 뉴스 원본 XML을 자바스크립트가 직접 분해! (제한 10개 해제됨)
+            // 1순위 서버 먼저 찌르기
+            fetch(proxy1)
+                .then(res => { if(!res.ok) throw new Error(); return res.text(); })
+                // 1순위 실패 시 2순위 서버로 재시도 (이중 우회)
+                .catch(() => fetch(proxy2).then(res => { if(!res.ok) throw new Error(); return res.text(); }))
+                .then(xmlString => {
                     const parser = new DOMParser();
-                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    const xmlDoc = parser.parseFromString(xmlString, "text/xml");
                     const items = xmlDoc.querySelectorAll("item");
                     
                     const articles = Array.from(items).map(item => ({
-                        title: item.querySelector("title").textContent,
-                        link: item.querySelector("link").textContent,
-                        pubDate: item.querySelector("pubDate").textContent
+                        title: item.querySelector("title") ? item.querySelector("title").textContent : "제목 없음",
+                        link: item.querySelector("link") ? item.querySelector("link").textContent : "#",
+                        pubDate: item.querySelector("pubDate") ? item.querySelector("pubDate").textContent : new Date().toISOString()
                     }));
 
                     if(articles.length === 0) {
@@ -566,7 +537,7 @@
                     }
 
                     if(listElementId === 'global-news-list') {
-                        allGlobalNews = articles; // 100개 가까운 뉴스 배열 장전!
+                        allGlobalNews = articles; 
                         renderGlobalNewsList();
                         
                         const tickerText = articles.slice(0, 15).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
@@ -576,7 +547,6 @@
                             document.getElementById('load-more-news-btn').style.display = 'block';
                         }
                     } else {
-                        // 개별 기업 뉴스는 5개만 깔끔하게
                         listEl.innerHTML = '';
                         articles.slice(0, displayCount).forEach(article => {
                             const li = document.createElement('li');
@@ -588,7 +558,7 @@
                     }
                 })
                 .catch(error => {
-                    listEl.innerHTML = '<li>뉴스 서버 접근이 제한되었습니다. 잠시 후 다시 시도해 주세요.</li>';
+                    listEl.innerHTML = '<li>서버 접속자가 너무 많아 지연되고 있습니다. 화면 우측 하단의 새로고침(🔄)을 다시 눌러주세요.</li>';
                 });
         }
 
@@ -599,7 +569,6 @@
             const newsToShow = allGlobalNews.slice(0, currentlyDisplayedGlobalNews);
             newsToShow.forEach(article => {
                 const li = document.createElement('li');
-                // 시간 포맷 정리
                 const dateObj = new Date(article.pubDate);
                 const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
                 
@@ -657,7 +626,6 @@
         });
 
         document.getElementById('refresh-btn').addEventListener('click', () => {
-            // 새로고침 시 진짜 실시간 뉴스를 다시 가져옴!
             fetchRealTimeNews(null, 'global-news-list', null);
             fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5);
             
@@ -672,10 +640,7 @@
         setActiveStock(itStocks[0]); 
         renderExchangeWidget();
         
-        // 전체 경제 뉴스 로딩
         fetchRealTimeNews(null, 'global-news-list', null);
-        
-        // 명언 및 생일 메시지 출력
         displayDailyQuote(); 
 
     </script>
