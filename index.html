@@ -29,6 +29,7 @@
             margin: 0;
             padding: 0;
             transition: background-color 0.3s, color 0.3s;
+            overflow-x: hidden; /* 가로 스크롤 방지 */
         }
 
         /* 뉴스 전광판 */
@@ -38,6 +39,8 @@
             border-bottom: 2px solid var(--border-color);
             overflow: hidden;
             white-space: nowrap;
+            position: relative;
+            z-index: 10;
         }
         .ticker-content {
             display: inline-block;
@@ -54,7 +57,7 @@
         }
 
         /* 메인 레이아웃 */
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; position: relative; z-index: 10; }
         .header { text-align: center; margin-bottom: 20px; }
         #current-time { font-size: 0.9em; color: #888; }
         .card {
@@ -164,10 +167,10 @@
             color: #ffb6b9; /* 다크 모드: 무섭지 않은 부드러운 파스텔 핑크 */
         }
 
-        /* 깔끔한 기본 폰트로 복구 완료 */
+        /* 깔끔한 기본 폰트 */
         .quote-text {
             font-size: 1.3em;
-            font-style: normal; /* 기울임체 제거 */
+            font-style: normal; 
             color: var(--text-color);
             margin-bottom: 15px;
             line-height: 1.6;
@@ -180,6 +183,31 @@
             transition: all 0.3s;
         }
         body.dark-mode .quote-author { color: #aab7b8; }
+
+        /* 🌟 생일 하트 애니메이션 (마우스 클릭 방해 안함) 🌟 */
+        .heart-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none; /* 핵심: 차트 조작이나 버튼 클릭을 전혀 방해하지 않음! */
+            z-index: 9999;
+            overflow: hidden;
+            display: none; /* 기본은 숨김 */
+        }
+        .floating-heart {
+            position: absolute;
+            bottom: -10vh;
+            color: rgba(255, 182, 193, 0.7); /* 부드러운 파스텔 핑크 (투명도 70%) */
+            font-size: 2rem;
+            animation: floatUp ease-in forwards;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            100% { transform: translateY(-120vh) scale(1.5) rotate(360deg); opacity: 0; }
+        }
 
         /* 플로팅 UI */
         .exchange-wrapper {
@@ -214,6 +242,8 @@
     </style>
 </head>
 <body>
+
+    <div id="heart-container" class="heart-container"></div>
 
     <div class="news-ticker">
         <div class="ticker-content" id="ticker-text">
@@ -312,7 +342,6 @@
 
         let currentActiveStock = itStocks[0];
 
-        // 🌟 아버님을 위한 31일치 맞춤형 명언 데이터베이스 🌟
         const fatherQuotes = [
             { text: "나이를 먹는다는 것은 등산을 하는 것과 같다. 오를수록 숨은 차지만, 시야는 점점 넓어진다.", author: "잉그마르 베르히만" },
             { text: "청춘은 나이가 아니라 마음의 상태에 있다. 당신의 가장 눈부신 시절은 아직 오지 않았다.", author: "사무엘 울만" },
@@ -347,7 +376,6 @@
             { text: "당신의 존재 자체가 우리 가족의 가장 큰 축복이자 자랑입니다. 앞으로의 매일이 축제이길 바랍니다.", author: "가족 일동" }
         ];
 
-        // 🌟 앞으로의 아버님 음력 1월 28일 -> 양력 날짜 변환표 🌟
         const lunarBirthdayToSolar = {
             2024: "03-08",
             2025: "02-25",
@@ -363,7 +391,37 @@
             2035: "03-07"
         };
 
-        // 명언 및 생일 메시지 출력 함수
+        // 🌟 생일 하트 생성 마법 함수 🌟
+        function startHeartAnimation() {
+            const container = document.getElementById('heart-container');
+            container.style.display = 'block'; // 컨테이너 켜기
+            
+            // 0.4초마다 하트 하나씩 뿅뿅 생성
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('floating-heart');
+                
+                // 가끔 다른 모양의 기호(별 등)를 섞어도 되지만 하트로 통일
+                heart.innerText = '♥'; 
+                
+                // 가로 위치 랜덤 (0 ~ 100vw)
+                heart.style.left = Math.random() * 100 + 'vw';
+                
+                // 올라가는 속도 랜덤 (4초 ~ 7초)
+                heart.style.animationDuration = Math.random() * 3 + 4 + 's';
+                
+                // 하트 크기 랜덤
+                heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
+                
+                container.appendChild(heart);
+                
+                // 애니메이션이 끝나면 하트를 삭제해서 컴퓨터가 느려지지 않게 함
+                setTimeout(() => {
+                    heart.remove();
+                }, 7000); 
+            }, 400); 
+        }
+
         function displayDailyQuote() {
             const today = new Date();
             const year = today.getFullYear();
@@ -375,24 +433,25 @@
             const textEl = document.getElementById('daily-quote-text');
             const authorEl = document.getElementById('daily-quote-author');
 
-            // 🌟 1. 생일 확인 및 축하 메시지 (색상은 CSS에서 자동 적용!) 🌟
+            // 🌟 생일 체크 🌟
             if (lunarBirthdayToSolar[year] === todayStr) {
                 quoteCard.classList.add('birthday-mode');
                 textEl.innerHTML = "🎉 아빠 생신 축하해요!! 즐겁고 멋진 하루 보내세요 ♥ 🎉";
                 textEl.style.fontWeight = "bold";
-                textEl.style.fontSize = "1.6em"; // 메시지 크기 조절
+                textEl.style.fontSize = "1.6em"; 
                 
                 authorEl.innerText = "- 사랑하는 딸 올림 -";
+                
+                // 생일이면 하트 애니메이션 발동!!
+                startHeartAnimation();
                 return; 
             }
 
-            // 🌟 2. 생일이 아니면 일반 명언 출력 🌟
             const dayOfMonth = today.getDate();
             const quoteIndex = dayOfMonth - 1;
             const safeIndex = quoteIndex % fatherQuotes.length; 
             const selectedQuote = fatherQuotes[safeIndex];
 
-            // 생일 모드 해제
             quoteCard.classList.remove('birthday-mode');
             textEl.style.fontWeight = "normal";
             textEl.style.fontSize = "1.3em";
@@ -628,7 +687,7 @@
         setActiveStock(itStocks[0]); 
         renderExchangeWidget();
         loadGlobalNews();
-        displayDailyQuote(); // 명언(또는 생일 메시지) 출력!
+        displayDailyQuote(); 
 
     </script>
 </body>
