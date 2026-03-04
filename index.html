@@ -29,7 +29,7 @@
             margin: 0;
             padding: 0;
             transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden; /* 가로 스크롤 방지 */
+            overflow-x: hidden;
         }
 
         /* 뉴스 전광판 */
@@ -70,13 +70,7 @@
         }
 
         /* 2단 분리 대시보드 레이아웃 */
-        .dashboard-layout {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-        }
-
-        /* 좌측 탭 & 리스트 */
+        .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; }
         .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; }
         .sidebar-tabs { display: flex; gap: 5px; margin-bottom: 15px; }
         .tab-btn {
@@ -98,7 +92,6 @@
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
-        /* 우측 메인 차트 및 뉴스 */
         .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
         .chart-header h2 { margin: 0 0 15px 0; }
         #chart-container { height: 500px; width: 100%; margin-bottom: 20px; }
@@ -118,7 +111,6 @@
             .stock-item { min-width: 250px; }
         }
 
-        /* 하단 경제 뉴스 */
         #global-news-list { list-style: none; padding: 0; margin: 0; }
         #global-news-list li { padding: 15px 0; border-bottom: 1px solid var(--border-color); }
         #global-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
@@ -132,7 +124,7 @@
         }
         .load-more-btn:hover { background-color: var(--btn-hover-bg); color: var(--accent-color); border-color: var(--accent-color); }
 
-        /* 아버님을 위한 명언(및 생일) 섹션 스타일 */
+        /* 명언 & 생일 섹션 스타일 */
         .quote-card {
             background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%);
             border: 1px solid #dce1e4;
@@ -146,7 +138,6 @@
             border-color: #3a4146;
         }
         
-        /* 생일날 적용될 특별한 스타일 */
         .quote-card.birthday-mode {
             background: linear-gradient(135deg, #fff0f0 0%, #ffe0e0 100%);
             border-color: #ffcccc;
@@ -157,51 +148,28 @@
             border-color: #5a2c2c;
         }
 
-        /* 생일 모드 전용 예쁜 핑크 글씨 색상 지정 (눈 안 아프게!) */
         .quote-card.birthday-mode .quote-text,
-        .quote-card.birthday-mode .quote-author {
-            color: #d81b60; /* 라이트 모드: 따뜻하고 고급스러운 진분홍 */
-        }
+        .quote-card.birthday-mode .quote-author { color: #d81b60; }
         body.dark-mode .quote-card.birthday-mode .quote-text,
-        body.dark-mode .quote-card.birthday-mode .quote-author {
-            color: #ffb6b9; /* 다크 모드: 무섭지 않은 부드러운 파스텔 핑크 */
-        }
+        body.dark-mode .quote-card.birthday-mode .quote-author { color: #ffb6b9; }
 
-        /* 깔끔한 기본 폰트 */
         .quote-text {
-            font-size: 1.3em;
-            font-style: normal; 
-            color: var(--text-color);
-            margin-bottom: 15px;
-            line-height: 1.6;
-            transition: all 0.3s;
+            font-size: 1.3em; font-style: normal; color: var(--text-color);
+            margin-bottom: 15px; line-height: 1.6; transition: all 0.3s;
         }
         .quote-author {
-            font-size: 1.1em;
-            color: #7f8c8d;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-size: 1.1em; color: #7f8c8d; font-weight: bold; transition: all 0.3s;
         }
         body.dark-mode .quote-author { color: #aab7b8; }
 
-        /* 🌟 생일 하트 애니메이션 (마우스 클릭 방해 안함) 🌟 */
+        /* 하트 애니메이션 */
         .heart-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            pointer-events: none; /* 핵심: 차트 조작이나 버튼 클릭을 전혀 방해하지 않음! */
-            z-index: 9999;
-            overflow: hidden;
-            display: none; /* 기본은 숨김 */
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 9999; overflow: hidden; display: none;
         }
         .floating-heart {
-            position: absolute;
-            bottom: -10vh;
-            color: rgba(255, 182, 193, 0.7); /* 부드러운 파스텔 핑크 (투명도 70%) */
-            font-size: 2rem;
-            animation: floatUp ease-in forwards;
+            position: absolute; bottom: -10vh; color: rgba(255, 182, 193, 0.7);
+            font-size: 2rem; animation: floatUp ease-in forwards;
         }
         @keyframes floatUp {
             0% { transform: translateY(0) scale(0.5) rotate(0deg); opacity: 0; }
@@ -221,7 +189,6 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: 0.2s;
         }
         #toggle-exchange-btn:hover { background-color: var(--btn-hover-bg); }
-        
         .floating-exchange {
             width: 250px; background: var(--card-bg); padding: 10px;
             border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
@@ -247,7 +214,7 @@
 
     <div class="news-ticker">
         <div class="ticker-content" id="ticker-text">
-            <span>최신 경제 뉴스를 불러오는 중입니다...</span>
+            <span>최신 경제 뉴스를 실시간으로 수집하고 있습니다...</span>
         </div>
     </div>
 
@@ -291,7 +258,7 @@
         <div class="card">
             <h2 style="margin-top:0;">📰 글로벌 경제 시황 타임라인</h2>
             <ul id="global-news-list">
-                <li>뉴스를 불러오는 중입니다...</li>
+                <li>뉴스를 실시간으로 분석 중입니다...</li>
             </ul>
             <button class="load-more-btn" id="load-more-news-btn" style="display: none;">📰 더 많은 경제 뉴스 펼쳐보기</button>
         </div>
@@ -376,49 +343,55 @@
             { text: "당신의 존재 자체가 우리 가족의 가장 큰 축복이자 자랑입니다. 앞으로의 매일이 축제이길 바랍니다.", author: "가족 일동" }
         ];
 
+        // 🌟 2026년 ~ 2056년 (총 31년 치) 아버님 음력 1월 28일 완벽 변환표 🌟
         const lunarBirthdayToSolar = {
-            2024: "03-08",
-            2025: "02-25",
-            2026: "03-04",
+            2026: "03-16",
             2027: "03-05",
-            2028: "02-23",
+            2028: "02-22",
             2029: "03-12",
-            2030: "03-01",
+            2030: "03-02",
             2031: "02-19",
             2032: "03-09",
-            2033: "02-26",
-            2034: "03-17",
-            2035: "03-07"
+            2033: "02-27",
+            2034: "03-18",
+            2035: "03-07",
+            2036: "02-24",
+            2037: "03-14",
+            2038: "03-03",
+            2039: "02-20",
+            2040: "03-10",
+            2041: "02-28",
+            2042: "02-18",
+            2043: "03-09",
+            2044: "02-26",
+            2045: "03-16",
+            2046: "03-05",
+            2047: "02-22",
+            2048: "03-12",
+            2049: "03-01",
+            2050: "02-19",
+            2051: "03-10",
+            2052: "02-28",
+            2053: "03-18",
+            2054: "03-07",
+            2055: "02-24",
+            2056: "03-13"
         };
 
-        // 🌟 생일 하트 생성 마법 함수 🌟
         function startHeartAnimation() {
             const container = document.getElementById('heart-container');
-            container.style.display = 'block'; // 컨테이너 켜기
+            container.style.display = 'block'; 
             
-            // 0.4초마다 하트 하나씩 뿅뿅 생성
             setInterval(() => {
                 const heart = document.createElement('div');
                 heart.classList.add('floating-heart');
-                
-                // 가끔 다른 모양의 기호(별 등)를 섞어도 되지만 하트로 통일
                 heart.innerText = '♥'; 
-                
-                // 가로 위치 랜덤 (0 ~ 100vw)
                 heart.style.left = Math.random() * 100 + 'vw';
-                
-                // 올라가는 속도 랜덤 (4초 ~ 7초)
                 heart.style.animationDuration = Math.random() * 3 + 4 + 's';
-                
-                // 하트 크기 랜덤
                 heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
-                
                 container.appendChild(heart);
                 
-                // 애니메이션이 끝나면 하트를 삭제해서 컴퓨터가 느려지지 않게 함
-                setTimeout(() => {
-                    heart.remove();
-                }, 7000); 
+                setTimeout(() => { heart.remove(); }, 7000); 
             }, 400); 
         }
 
@@ -433,16 +406,13 @@
             const textEl = document.getElementById('daily-quote-text');
             const authorEl = document.getElementById('daily-quote-author');
 
-            // 🌟 생일 체크 🌟
             if (lunarBirthdayToSolar[year] === todayStr) {
                 quoteCard.classList.add('birthday-mode');
                 textEl.innerHTML = "🎉 아빠 생신 축하해요!! 즐겁고 멋진 하루 보내세요 ♥ 🎉";
                 textEl.style.fontWeight = "bold";
                 textEl.style.fontSize = "1.6em"; 
-                
                 authorEl.innerText = "- 사랑하는 딸 올림 -";
                 
-                // 생일이면 하트 애니메이션 발동!!
                 startHeartAnimation();
                 return; 
             }
@@ -521,7 +491,9 @@
             document.getElementById('chart-main-title').innerText = `📊 ${stockObj.name} 실시간 차트`;
             
             renderChart(stockObj.symbol);
-            loadCompanyNews(stockObj.keyword); 
+            
+            // 뉴스를 가져올 때 꼼수 부리지 못하도록 '직접 분해(DOMParser)' 로직 호출
+            fetchRealTimeNews(stockObj.keyword, 'company-news-list', 5);
         }
 
         function renderChart(symbol) {
@@ -552,65 +524,72 @@
             container.appendChild(script);
         }
 
-        function loadCompanyNews(keyword) {
-            const newsList = document.getElementById('company-news-list');
-            document.getElementById('company-news-title').innerText = `📰 ${keyword} 최근 관련 뉴스`;
-            newsList.innerHTML = '<li>뉴스를 검색 중입니다...</li>';
+        // 🌟 [핵심 업데이트] 무료 API의 캐시 꼼수를 막고 XML을 직접 해석하는 최강의 뉴스 수집기 🌟
+        function fetchRealTimeNews(keyword, listElementId, displayCount) {
+            const listEl = document.getElementById(listElementId);
+            if(listElementId === 'company-news-list') {
+                document.getElementById('company-news-title').innerText = `📰 ${keyword} 최근 관련 뉴스`;
+            }
+            listEl.innerHTML = '<li>진짜 실시간 뉴스를 긁어오는 중입니다...</li>';
 
             const cacheBuster = new Date().getTime();
-            const searchKeyword = encodeURIComponent(keyword + " 주식 OR 경제");
-            const rssUrl = `https://news.google.com/rss/search?q=${searchKeyword}&hl=ko&gl=KR&ceid=KR:ko&cb=${cacheBuster}`;
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+            let rssUrl = '';
+            
+            if(keyword) {
+                const searchKeyword = encodeURIComponent(keyword + " 주식 OR 경제");
+                rssUrl = `https://news.google.com/rss/search?q=${searchKeyword}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`;
+            } else {
+                const searchKeyword = encodeURIComponent('경제 OR 증시 OR 금융');
+                rssUrl = `https://news.google.com/rss/search?q=${searchKeyword}&hl=ko&gl=KR&ceid=KR:ko&_=${cacheBuster}`;
+            }
 
-            fetch(apiUrl)
+            // rss2json 대신, 원본 데이터를 통째로 뚫어주는 allorigins 프록시 사용!
+            const proxyUrl = `https://api.allorigins.win/get?disableCache=true&url=${encodeURIComponent(rssUrl)}`;
+
+            fetch(proxyUrl)
                 .then(response => response.json())
                 .then(data => {
-                    if(data.status !== "ok") throw new Error("API 오류");
+                    // 구글 뉴스 원본 XML을 자바스크립트가 직접 분해! (제한 10개 해제됨)
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(data.contents, "text/xml");
+                    const items = xmlDoc.querySelectorAll("item");
                     
-                    newsList.innerHTML = '';
-                    const articles = data.items.slice(0, 5); 
-                    
+                    const articles = Array.from(items).map(item => ({
+                        title: item.querySelector("title").textContent,
+                        link: item.querySelector("link").textContent,
+                        pubDate: item.querySelector("pubDate").textContent
+                    }));
+
                     if(articles.length === 0) {
-                        newsList.innerHTML = '<li>최근 관련 뉴스가 없습니다.</li>';
+                        listEl.innerHTML = '<li>관련 뉴스가 없습니다.</li>';
                         return;
                     }
-                    
-                    articles.forEach(article => {
-                        const li = document.createElement('li');
-                        const dateObj = new Date(article.pubDate);
-                        const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
-                        li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
-                        newsList.appendChild(li);
-                    });
-                })
-                .catch(error => {
-                    newsList.innerHTML = '<li>뉴스를 불러오지 못했습니다. 새로고침을 눌러주세요.</li>';
-                });
-        }
 
-        function loadGlobalNews() {
-            const cacheBuster = new Date().getTime();
-            const rssUrl = `https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko&cb=${cacheBuster}`;
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if(data.status !== "ok") throw new Error("API 오류");
-                    
-                    allGlobalNews = data.items;
-                    currentlyDisplayedGlobalNews = 5; 
-                    
-                    const tickerText = allGlobalNews.slice(0, 10).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
-                    document.getElementById('ticker-text').innerHTML = `<span>${tickerText}</span>`;
-
-                    renderGlobalNewsList();
-                    
-                    if(allGlobalNews.length > 5) {
-                        document.getElementById('load-more-news-btn').style.display = 'block';
+                    if(listElementId === 'global-news-list') {
+                        allGlobalNews = articles; // 100개 가까운 뉴스 배열 장전!
+                        renderGlobalNewsList();
+                        
+                        const tickerText = articles.slice(0, 15).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
+                        document.getElementById('ticker-text').innerHTML = `<span>${tickerText}</span>`;
+                        
+                        if(allGlobalNews.length > currentlyDisplayedGlobalNews) {
+                            document.getElementById('load-more-news-btn').style.display = 'block';
+                        }
+                    } else {
+                        // 개별 기업 뉴스는 5개만 깔끔하게
+                        listEl.innerHTML = '';
+                        articles.slice(0, displayCount).forEach(article => {
+                            const li = document.createElement('li');
+                            const dateObj = new Date(article.pubDate);
+                            const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                            li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
+                            listEl.appendChild(li);
+                        });
                     }
                 })
-                .catch(error => console.error('뉴스 실패:', error));
+                .catch(error => {
+                    listEl.innerHTML = '<li>뉴스 서버 접근이 제한되었습니다. 잠시 후 다시 시도해 주세요.</li>';
+                });
         }
 
         function renderGlobalNewsList() {
@@ -620,7 +599,11 @@
             const newsToShow = allGlobalNews.slice(0, currentlyDisplayedGlobalNews);
             newsToShow.forEach(article => {
                 const li = document.createElement('li');
-                li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title}</a>`;
+                // 시간 포맷 정리
+                const dateObj = new Date(article.pubDate);
+                const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()} ${dateObj.getHours()}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+                
+                li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
                 newsList.appendChild(li);
             });
         }
@@ -674,8 +657,10 @@
         });
 
         document.getElementById('refresh-btn').addEventListener('click', () => {
-            loadGlobalNews();
-            loadCompanyNews(currentActiveStock.keyword);
+            // 새로고침 시 진짜 실시간 뉴스를 다시 가져옴!
+            fetchRealTimeNews(null, 'global-news-list', null);
+            fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5);
+            
             const targetList = (currentTab === 'it') ? itStocks : trendStocks;
             setupStockList(targetList);
             renderChart(currentActiveStock.symbol);
@@ -686,7 +671,11 @@
         setupStockList(itStocks);
         setActiveStock(itStocks[0]); 
         renderExchangeWidget();
-        loadGlobalNews();
+        
+        // 전체 경제 뉴스 로딩
+        fetchRealTimeNews(null, 'global-news-list', null);
+        
+        // 명언 및 생일 메시지 출력
         displayDailyQuote(); 
 
     </script>
