@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>글로벌 IT & 경제 실시간 대시보드</title>
     <style>
-        /* 따뜻한 손글씨 폰트 불러오기 */
-        @import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap');
-
         /* 테마 변수 설정 */
         :root {
             --bg-color: #f4f7f6;
@@ -146,7 +143,7 @@
             border-color: #3a4146;
         }
         
-        /* 생일날 적용될 특별한 스타일 (자바스크립트로 활성화) */
+        /* 생일날 적용될 특별한 스타일 */
         .quote-card.birthday-mode {
             background: linear-gradient(135deg, #fff0f0 0%, #ffe0e0 100%);
             border-color: #ffcccc;
@@ -157,20 +154,29 @@
             border-color: #5a2c2c;
         }
 
-        /* 손글씨 폰트 및 기울임체 제거 적용 완료! */
+        /* 생일 모드 전용 예쁜 핑크 글씨 색상 지정 (눈 안 아프게!) */
+        .quote-card.birthday-mode .quote-text,
+        .quote-card.birthday-mode .quote-author {
+            color: #d81b60; /* 라이트 모드: 따뜻하고 고급스러운 진분홍 */
+        }
+        body.dark-mode .quote-card.birthday-mode .quote-text,
+        body.dark-mode .quote-card.birthday-mode .quote-author {
+            color: #ffb6b9; /* 다크 모드: 무섭지 않은 부드러운 파스텔 핑크 */
+        }
+
+        /* 깔끔한 기본 폰트로 복구 완료 */
         .quote-text {
-            font-size: 1.8em; 
+            font-size: 1.3em;
             font-style: normal; /* 기울임체 제거 */
             color: var(--text-color);
             margin-bottom: 15px;
             line-height: 1.6;
-            font-family: 'Nanum Pen Script', cursive; /* 따뜻한 손글씨 폰트 */
             transition: all 0.3s;
         }
         .quote-author {
-            font-size: 1.3em;
+            font-size: 1.1em;
             color: #7f8c8d;
-            font-family: 'Nanum Pen Script', cursive; /* 작성자도 손글씨 폰트로 통일 */
+            font-weight: bold;
             transition: all 0.3s;
         }
         body.dark-mode .quote-author { color: #aab7b8; }
@@ -341,7 +347,7 @@
             { text: "당신의 존재 자체가 우리 가족의 가장 큰 축복이자 자랑입니다. 앞으로의 매일이 축제이길 바랍니다.", author: "가족 일동" }
         ];
 
-        // 🌟 [핵심 치트키] 앞으로의 아버님 음력 1월 28일 -> 양력 날짜 변환표 (2024년 ~ 2035년) 🌟
+        // 🌟 앞으로의 아버님 음력 1월 28일 -> 양력 날짜 변환표 🌟
         const lunarBirthdayToSolar = {
             2024: "03-08",
             2025: "02-25",
@@ -361,7 +367,6 @@
         function displayDailyQuote() {
             const today = new Date();
             const year = today.getFullYear();
-            // MM-DD 형태로 오늘 날짜 만들기 (예: 03-16)
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             const todayStr = `${month}-${day}`;
@@ -370,35 +375,30 @@
             const textEl = document.getElementById('daily-quote-text');
             const authorEl = document.getElementById('daily-quote-author');
 
-            // 🌟 1. 오늘이 아버님 생신(음력 1/28을 변환한 양력 날짜)인지 확인! 🌟
+            // 🌟 1. 생일 확인 및 축하 메시지 (색상은 CSS에서 자동 적용!) 🌟
             if (lunarBirthdayToSolar[year] === todayStr) {
-                // 생일 모드 발동! 배경색 화사하게 변경 및 메시지 출력
                 quoteCard.classList.add('birthday-mode');
                 textEl.innerHTML = "🎉 아빠 생신 축하해요!! 즐겁고 멋진 하루 보내세요 ♥ 🎉";
-                textEl.style.color = "var(--accent-color)";
                 textEl.style.fontWeight = "bold";
-                textEl.style.fontSize = "2.2em"; // 생일 메시지는 더 크게!
+                textEl.style.fontSize = "1.6em"; // 메시지 크기 조절
                 
                 authorEl.innerText = "- 사랑하는 딸 올림 -";
-                authorEl.style.color = "var(--accent-color)";
-                return; // 생일이면 아래 명언 로직은 무시하고 종료
+                return; 
             }
 
-            // 🌟 2. 생일이 아니면 평소처럼 매일 바뀌는 명언 출력 🌟
+            // 🌟 2. 생일이 아니면 일반 명언 출력 🌟
             const dayOfMonth = today.getDate();
             const quoteIndex = dayOfMonth - 1;
             const safeIndex = quoteIndex % fatherQuotes.length; 
             const selectedQuote = fatherQuotes[safeIndex];
 
-            // 혹시 생일이 지나고 다음날 접속했을 때 원래대로 되돌리기 위한 설정
+            // 생일 모드 해제
             quoteCard.classList.remove('birthday-mode');
-            textEl.style.color = "";
             textEl.style.fontWeight = "normal";
-            textEl.style.fontSize = "1.8em";
+            textEl.style.fontSize = "1.3em";
 
             textEl.innerText = `"${selectedQuote.text}"`;
             authorEl.innerText = `- ${selectedQuote.author} -`;
-            authorEl.style.color = "";
         }
 
         function updateTime() {
