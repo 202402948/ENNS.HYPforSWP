@@ -54,7 +54,7 @@
         }
 
         /* 메인 레이아웃 */
-        .container { max-width: 1300px; margin: 20px auto; padding: 0 20px; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; }
         .header { text-align: center; margin-bottom: 20px; }
         #current-time { font-size: 0.9em; color: #888; }
         .card {
@@ -73,15 +73,39 @@
             align-items: flex-start;
         }
 
-        /* 좌측 주식 리스트 (전체 노출 & 스크롤) */
+        /* 좌측 주식 리스트 */
         .stock-sidebar {
-            width: 300px;
+            width: 320px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
         }
+        
+        /* 주식 카테고리 탭 버튼 */
+        .sidebar-tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background-color: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
         .stock-list-container {
-            max-height: 600px;
+            max-height: 650px;
             overflow-y: auto;
             padding-right: 5px;
             display: flex;
@@ -109,7 +133,7 @@
             z-index: 10;
         }
 
-        /* 우측 메인 차트 영역 */
+        /* 우측 메인 차트 및 개별 기업 뉴스 영역 */
         .main-chart-area {
             flex-grow: 1;
             min-width: 0;
@@ -117,20 +141,32 @@
             flex-direction: column;
         }
         .chart-header h2 { margin: 0 0 15px 0; }
-        #chart-container { height: 600px; width: 100%; }
+        #chart-container { height: 500px; width: 100%; margin-bottom: 20px; }
+        
+        /* 개별 기업 뉴스 디자인 */
+        .company-news-area {
+            padding-top: 15px;
+            border-top: 2px dashed var(--border-color);
+        }
+        .company-news-area h3 { margin-top: 0; color: var(--accent-color); }
+        .company-news-list { list-style: none; padding: 0; margin: 0; }
+        .company-news-list li { padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+        .company-news-list li:last-child { border-bottom: none; }
+        .company-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; }
+        .company-news-list a:hover { color: var(--accent-color); }
 
         @media (max-width: 900px) {
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
-            .stock-list-container { flex-direction: row; overflow-x: auto; max-height: 120px; padding-bottom: 10px; }
+            .stock-list-container { flex-direction: row; overflow-x: auto; max-height: 140px; padding-bottom: 10px; }
             .stock-item { min-width: 250px; }
         }
 
-        /* 하단 뉴스 리스트 */
-        #news-list { list-style: none; padding: 0; margin: 0; }
-        #news-list li { padding: 15px 0; border-bottom: 1px solid var(--border-color); }
-        #news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
-        #news-list a:hover { color: var(--accent-color); }
+        /* 하단 전체 경제 뉴스 리스트 */
+        #global-news-list { list-style: none; padding: 0; margin: 0; }
+        #global-news-list li { padding: 15px 0; border-bottom: 1px solid var(--border-color); }
+        #global-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
+        #global-news-list a:hover { color: var(--accent-color); }
         
         .load-more-btn {
             display: block; width: 100%; padding: 12px; margin-top: 15px;
@@ -159,9 +195,7 @@
             border: 1px solid var(--border-color);
             transition: opacity 0.3s, transform 0.3s;
         }
-        .floating-exchange.hidden {
-            opacity: 0; pointer-events: none; transform: translateY(-10px);
-        }
+        .floating-exchange.hidden { opacity: 0; pointer-events: none; transform: translateY(-10px); }
         
         @media (max-width: 1100px) { .exchange-wrapper { display: none; } }
 
@@ -199,25 +233,35 @@
         <div class="card">
             <div class="dashboard-layout">
                 <div class="stock-sidebar">
-                    <h3 style="margin-top: 0; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">관심 종목 시세</h3>
+                    <div class="sidebar-tabs">
+                        <button id="tab-it" class="tab-btn active" onclick="switchTab('it')">💻 IT 대장주</button>
+                        <button id="tab-trend" class="tab-btn" onclick="switchTab('trend')">🔥 요즘 뜨는 기업</button>
+                    </div>
                     <div class="stock-list-container" id="stock-list"></div>
                 </div>
 
                 <div class="main-chart-area">
                     <div class="chart-header">
-                        <h2>📊 실시간 증시 현황 (고급 차트)</h2>
+                        <h2 id="chart-main-title">📊 실시간 증시 현황</h2>
                     </div>
                     <div id="chart-container"></div>
+                    
+                    <div class="company-news-area">
+                        <h3 id="company-news-title">📰 기업 관련 뉴스</h3>
+                        <ul class="company-news-list" id="company-news-list">
+                            <li>종목을 선택하면 관련 뉴스가 표시됩니다.</li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="card">
-            <h2 style="margin-top:0;">📰 최신 경제 뉴스 타임라인</h2>
-            <ul id="news-list">
+            <h2 style="margin-top:0;">📰 글로벌 경제 시황 타임라인</h2>
+            <ul id="global-news-list">
                 <li>뉴스를 불러오는 중입니다...</li>
             </ul>
-            <button class="load-more-btn" id="load-more-news-btn" style="display: none;">📰 더 많은 뉴스 펼쳐보기</button>
+            <button class="load-more-btn" id="load-more-news-btn" style="display: none;">📰 더 많은 경제 뉴스 펼쳐보기</button>
         </div>
     </div>
 
@@ -228,29 +272,41 @@
 
     <script>
         let isDarkMode = false;
-        let currentSymbol = 'NASDAQ:NVDA';
         let isExchangeVisible = true;
+        let currentTab = 'it'; 
         
-        // 뉴스 데이터 저장용 배열
-        let allNewsItems = [];
-        let currentlyDisplayedNews = 5;
+        let allGlobalNews = [];
+        let currentlyDisplayedGlobalNews = 5;
 
-        // 전체 주식 목록
-        const allStocks = [
-            { symbol: 'NASDAQ:NVDA' },
-            { symbol: 'NASDAQ:TSLA' },
-            { symbol: 'KRX:000660' }, // SK하이닉스
-            { symbol: 'NASDAQ:PLTR' },
-            { symbol: 'NASDAQ:RKLB' },
-            { symbol: 'NASDAQ:AAPL' },
-            { symbol: 'NASDAQ:MSFT' },
-            { symbol: 'NASDAQ:GOOGL' },
-            { symbol: 'NASDAQ:META' },
-            { symbol: 'NASDAQ:AMD' },
-            { symbol: 'KRX:005930' } // 삼성전자
+        // 1. IT 대장주 리스트 (검색용 한글 키워드 추가)
+        const itStocks = [
+            { symbol: 'NASDAQ:NVDA', name: '엔비디아', keyword: '엔비디아' },
+            { symbol: 'NASDAQ:TSLA', name: '테슬라', keyword: '테슬라' },
+            { symbol: 'NASDAQ:AAPL', name: '애플', keyword: '애플' },
+            { symbol: 'NASDAQ:MSFT', name: '마이크로소프트', keyword: '마이크로소프트' },
+            { symbol: 'NASDAQ:GOOGL', name: '구글', keyword: '구글' },
+            { symbol: 'NASDAQ:AMZN', name: '아마존', keyword: '아마존' },
+            { symbol: 'NASDAQ:META', name: '메타', keyword: '메타' },
+            { symbol: 'NYSE:TSM', name: 'TSMC', keyword: 'TSMC' },
+            { symbol: 'NASDAQ:AVGO', name: '브로드컴', keyword: '브로드컴' },
+            { symbol: 'NASDAQ:ASML', name: 'ASML', keyword: 'ASML' },
+            { symbol: 'NASDAQ:AMD', name: 'AMD', keyword: 'AMD' }
         ];
 
-        // 시계 업데이트
+        // 2. 요즘 뜨는 기업 리스트 (검색용 한글 키워드 추가)
+        const trendStocks = [
+            { symbol: 'NASDAQ:PLTR', name: '팔란티어', keyword: '팔란티어' },
+            { symbol: 'NASDAQ:RKLB', name: '로켓랩', keyword: '로켓랩' },
+            { symbol: 'NASDAQ:ARM', name: 'ARM 홀딩스', keyword: 'ARM 홀딩스' },
+            { symbol: 'NASDAQ:MSTR', name: '마이크로스트레티지', keyword: '마이크로스트레티지' },
+            { symbol: 'NASDAQ:SMCI', name: '슈퍼마이크로', keyword: '슈퍼마이크로컴퓨터' },
+            { symbol: 'NASDAQ:CRWD', name: '크라우드스트라이크', keyword: '크라우드스트라이크' },
+            { symbol: 'NYSE:LLY', name: '일라이릴리', keyword: '일라이릴리' } // 비만치료제로 폭발적 성장
+        ];
+
+        let currentActiveStock = itStocks[0]; // 시작은 엔비디아
+
+        // 시계
         function updateTime() {
             const now = new Date();
             const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit' };
@@ -258,21 +314,35 @@
         }
         setInterval(updateTime, 1000); updateTime();
 
-        // 좌측 미니 시세표 리스트 (전체 렌더링)
-        function setupStockList() {
+        // 탭 전환 함수
+        window.switchTab = function(tabName) {
+            currentTab = tabName;
+            
+            // 버튼 스타일 업데이트
+            document.getElementById('tab-it').classList.toggle('active', tabName === 'it');
+            document.getElementById('tab-trend').classList.toggle('active', tabName === 'trend');
+            
+            // 탭에 맞는 리스트 렌더링 및 첫 번째 주식 자동 선택
+            const targetList = (tabName === 'it') ? itStocks : trendStocks;
+            setupStockList(targetList);
+            setActiveStock(targetList[0]); 
+        };
+
+        // 좌측 리스트 렌더링
+        function setupStockList(stockArray) {
             const container = document.getElementById('stock-list');
             container.innerHTML = ''; 
             const themeStr = isDarkMode ? "dark" : "light";
             
-            allStocks.forEach(stock => {
+            stockArray.forEach(stock => {
                 const item = document.createElement('div');
                 item.className = 'stock-item';
                 item.dataset.symbol = stock.symbol;
-                if(stock.symbol === currentSymbol) item.classList.add('active');
+                if(stock.symbol === currentActiveStock.symbol) item.classList.add('active');
 
                 const overlay = document.createElement('div');
                 overlay.className = 'stock-item-overlay';
-                overlay.onclick = () => { setActiveStock(stock.symbol); };
+                overlay.onclick = () => { setActiveStock(stock); };
                 item.appendChild(overlay);
 
                 const widgetDiv = document.createElement('div');
@@ -292,20 +362,27 @@
             });
         }
 
-        // 종목 클릭 시
-        function setActiveStock(symbol) {
-            currentSymbol = symbol;
+        // 종목 선택 시 차트와 뉴스를 동시에 업데이트
+        function setActiveStock(stockObj) {
+            currentActiveStock = stockObj;
+            
+            // 리스트 하이라이트 변경
             document.querySelectorAll('.stock-item').forEach(item => {
-                if(item.dataset.symbol === symbol) {
+                if(item.dataset.symbol === stockObj.symbol) {
                     item.classList.add('active');
                 } else {
                     item.classList.remove('active');
                 }
             });
-            renderChart(currentSymbol);
+            
+            // 차트 제목 업데이트
+            document.getElementById('chart-main-title').innerText = `📊 ${stockObj.name} 실시간 차트`;
+            
+            renderChart(stockObj.symbol);
+            loadCompanyNews(stockObj.keyword); // 선택한 기업의 뉴스 불러오기!
         }
 
-        // 메인 차트 렌더링 (국내 주식 지원을 위해 '고급 차트'로 고정)
+        // 차트 렌더링
         function renderChart(symbol) {
             const container = document.getElementById('chart-container');
             container.innerHTML = ''; 
@@ -326,14 +403,94 @@
                 "hide_legend": false,
                 "save_image": false,
                 "studies_overrides": {
-                    "volume.volume.color.0": "#0000ff", // 하락 파랑
-                    "volume.volume.color.1": "#ff0000"  // 상승 빨강
+                    "volume.volume.color.0": "#0000ff",
+                    "volume.volume.color.1": "#ff0000"
                 }
             });
-            
             script.async = true;
             container.appendChild(script);
         }
+
+        // 특정 기업 관련 맞춤형 뉴스 로딩 (구글 뉴스 검색 RSS 활용)
+        function loadCompanyNews(keyword) {
+            const newsList = document.getElementById('company-news-list');
+            document.getElementById('company-news-title').innerText = `📰 ${keyword} 최근 관련 뉴스`;
+            newsList.innerHTML = '<li>뉴스를 검색 중입니다...</li>';
+
+            // 기업 이름으로 검색하는 RSS URL
+            const searchKeyword = encodeURIComponent(keyword + " 주식 OR 경제");
+            const rssUrl = `https://news.google.com/rss/search?q=${searchKeyword}&hl=ko&gl=KR&ceid=KR:ko`;
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status !== "ok") throw new Error("API 오류");
+                    
+                    newsList.innerHTML = '';
+                    const articles = data.items.slice(0, 5); // 5개만 표시
+                    
+                    if(articles.length === 0) {
+                        newsList.innerHTML = '<li>최근 관련 뉴스가 없습니다.</li>';
+                        return;
+                    }
+                    
+                    articles.forEach(article => {
+                        const li = document.createElement('li');
+                        // 날짜 깔끔하게 표시
+                        const dateObj = new Date(article.pubDate);
+                        const dateStr = `${dateObj.getMonth()+1}/${dateObj.getDate()}`;
+                        li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${dateStr})</span></a>`;
+                        newsList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    newsList.innerHTML = '<li>뉴스를 불러오지 못했습니다.</li>';
+                });
+        }
+
+        // 전체 거시경제 뉴스 로딩
+        function loadGlobalNews() {
+            const rssUrl = 'https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko';
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status !== "ok") throw new Error("API 오류");
+                    
+                    allGlobalNews = data.items;
+                    currentlyDisplayedGlobalNews = 5; 
+                    
+                    const tickerText = allGlobalNews.slice(0, 10).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
+                    document.getElementById('ticker-text').innerHTML = `<span>${tickerText}</span>`;
+
+                    renderGlobalNewsList();
+                    
+                    if(allGlobalNews.length > 5) {
+                        document.getElementById('load-more-news-btn').style.display = 'block';
+                    }
+                })
+                .catch(error => console.error('뉴스 실패:', error));
+        }
+
+        function renderGlobalNewsList() {
+            const newsList = document.getElementById('global-news-list');
+            newsList.innerHTML = '';
+            
+            const newsToShow = allGlobalNews.slice(0, currentlyDisplayedGlobalNews);
+            newsToShow.forEach(article => {
+                const li = document.createElement('li');
+                li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title}</a>`;
+                newsList.appendChild(li);
+            });
+        }
+
+        document.getElementById('load-more-news-btn').addEventListener('click', (e) => {
+            currentlyDisplayedGlobalNews += 10; 
+            renderGlobalNewsList();
+            if(currentlyDisplayedGlobalNews >= allGlobalNews.length) e.target.style.display = 'none';
+        });
 
         // 환율 위젯
         function renderExchangeWidget() {
@@ -353,7 +510,6 @@
             container.appendChild(script);
         }
 
-        // 환율 위젯 숨기기/열기 토글
         document.getElementById('toggle-exchange-btn').addEventListener('click', () => {
             isExchangeVisible = !isExchangeVisible;
             const container = document.getElementById('exchange-container');
@@ -368,80 +524,32 @@
             }
         });
 
-        // 뉴스 로딩 및 더 보기 기능
-        function loadNews() {
-            const rssUrl = 'https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko';
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-
-            fetch(apiUrl)
-                .then(response => response.json())
-                .then(data => {
-                    if(data.status !== "ok") throw new Error("API 오류");
-                    
-                    // 전체 뉴스를 저장
-                    allNewsItems = data.items;
-                    currentlyDisplayedNews = 5; // 처음엔 5개만
-                    
-                    // 전광판 세팅 (10개 정도만 롤링)
-                    const tickerText = allNewsItems.slice(0, 10).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ');
-                    document.getElementById('ticker-text').innerHTML = `<span>${tickerText}</span>`;
-
-                    renderNewsList();
-                    
-                    // 뉴스가 5개 이상이면 '더 보기' 버튼 표시
-                    if(allNewsItems.length > 5) {
-                        document.getElementById('load-more-news-btn').style.display = 'block';
-                    }
-                })
-                .catch(error => console.error('뉴스 실패:', error));
-        }
-
-        function renderNewsList() {
-            const newsList = document.getElementById('news-list');
-            newsList.innerHTML = '';
-            
-            const newsToShow = allNewsItems.slice(0, currentlyDisplayedNews);
-            newsToShow.forEach(article => {
-                const li = document.createElement('li');
-                li.innerHTML = `<a href="${article.link}" target="_blank">► ${article.title}</a>`;
-                newsList.appendChild(li);
-            });
-        }
-
-        // 뉴스 더 보기 버튼 이벤트
-        document.getElementById('load-more-news-btn').addEventListener('click', (e) => {
-            currentlyDisplayedNews += 10; // 누를 때마다 10개씩 추가 표시
-            renderNewsList();
-            
-            // 더 이상 보여줄 뉴스가 없으면 버튼 숨기기
-            if(currentlyDisplayedNews >= allNewsItems.length) {
-                e.target.style.display = 'none';
-            }
-        });
-
-        // 테마 및 새로고침
         document.getElementById('theme-btn').addEventListener('click', () => {
             isDarkMode = !isDarkMode;
             document.body.classList.toggle('dark-mode', isDarkMode);
             document.getElementById('theme-btn').innerText = isDarkMode ? "☀️" : "🌙";
             
-            setupStockList(); 
-            renderChart(currentSymbol);
+            // 현재 탭의 리스트 다시 그리기
+            const targetList = (currentTab === 'it') ? itStocks : trendStocks;
+            setupStockList(targetList); 
+            renderChart(currentActiveStock.symbol);
             renderExchangeWidget();
         });
 
         document.getElementById('refresh-btn').addEventListener('click', () => {
-            loadNews();
-            setupStockList();
-            renderChart(currentSymbol);
+            loadGlobalNews();
+            loadCompanyNews(currentActiveStock.keyword);
+            const targetList = (currentTab === 'it') ? itStocks : trendStocks;
+            setupStockList(targetList);
+            renderChart(currentActiveStock.symbol);
             renderExchangeWidget();
         });
 
         // 초기 실행
-        setupStockList();
-        renderChart(currentSymbol);
+        setupStockList(itStocks);
+        setActiveStock(itStocks[0]); // 엔비디아 차트 & 뉴스 로딩
         renderExchangeWidget();
-        loadNews();
+        loadGlobalNews();
 
     </script>
 </body>
