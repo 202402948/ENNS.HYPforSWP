@@ -44,7 +44,7 @@
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         /* 📦 레이아웃 및 카드 */
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; position: relative; z-index: 1; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; position: relative; z-index: 10; }
         .header { text-align: center; margin-bottom: 20px; }
         #current-time { font-size: 0.9em; color: #888; }
         
@@ -53,30 +53,25 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid var(--border-color);
         }
 
-        /* 📊 대시보드 메인 영역 (트랜스포머 레이아웃) */
-        .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; }
-        .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; transition: width 0.3s; }
-        .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
-        
-        /* 🌟 주도주 탭을 눌렀을 때 발동하는 화면 전체 확장 모드! 🌟 */
-        .dashboard-layout.trend-mode .stock-sidebar { width: 100%; } /* 좌측을 100%로 꽉 채움 */
-        .dashboard-layout.trend-mode .main-chart-area { display: none; } /* 우측 차트 영역 숨김 */
-
-        /* 탭 버튼 스타일 */
+        /* 🌟 탭 버튼 영역 🌟 */
         .sidebar-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn {
             flex: 1; padding: 15px 5px; border: 2px solid var(--border-color);
             background-color: var(--bg-color); color: var(--text-color);
             border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
-            font-size: 1.1em;
+            font-size: 1.1em; -webkit-tap-highlight-color: transparent;
         }
         .tab-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
         
-        #stock-list-wrapper { width: 100%; }
-        
-        /* 핫리스트 위젯 전용 넉넉한 공간 */
-        .trend-widget-container { height: 800px; width: 100%; border-radius: 8px; overflow: hidden; }
+        /* 🌟 [핵심] 투룸 구조 (방 2개) 설정 🌟 */
+        #it-mode-content { display: flex; gap: 20px; align-items: flex-start; width: 100%; }
+        #trend-mode-content { display: none; width: 100%; } /* 초기엔 주도주 방을 숨김 */
 
+        .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; }
+        .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
+
+        /* 주식 리스트 스크롤 영역 */
+        #stock-list-wrapper { width: 100%; }
         .stock-list-container {
             max-height: 650px; overflow-y: auto; padding-right: 5px;
             display: flex; flex-direction: column; gap: 10px;
@@ -93,8 +88,11 @@
 
         #chart-container { height: 500px; width: 100%; margin-bottom: 20px; }
         
-        .company-news-area { padding-top: 15px; border-top: 2px dashed var(--border-color); }
-        .company-news-list { list-style: none; padding: 0; margin: 0; min-height: 100px; }
+        /* 핫리스트 위젯 전용 공간 (크기 고정으로 터치 오류 방지) */
+        #trend-widget-wrapper { height: 700px; width: 100%; border-radius: 8px; overflow: hidden; position: relative; }
+
+        .company-news-area { padding-top: 15px; border-top: 2px dashed var(--border-color); margin-top: 20px; }
+        .company-news-list { list-style: none; padding: 0; margin: 0; min-height: 80px; }
         .company-news-list li { padding: 10px 0; border-bottom: 1px solid var(--border-color); }
         .company-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; }
 
@@ -102,16 +100,17 @@
 
         /* 📱 모바일 최적화 */
         @media (max-width: 900px) {
-            .dashboard-layout { flex-direction: column; }
+            #it-mode-content { flex-direction: column; }
             .stock-sidebar { width: 100%; }
-            .dashboard-layout.trend-mode .stock-sidebar { width: 100%; }
             
             .stock-list-container { 
                 flex-direction: row; overflow-x: auto; max-height: none; 
                 padding-bottom: 15px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; 
             }
             .stock-item { min-width: 280px; flex-shrink: 0; scroll-snap-align: start; }
-            #chart-container { height: 280px; }
+            
+            #chart-container { height: 300px; }
+            #trend-widget-wrapper { height: 550px; } /* 모바일에서 핫리스트 높이 보장 */
             
             .exchange-wrapper { position: static; width: 100%; margin-bottom: 20px; align-items: stretch; }
             .floating-exchange { width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
@@ -135,22 +134,13 @@
         #global-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
         .load-more-btn { display: block; width: 100%; padding: 12px; margin-top: 15px; background: transparent; border: 2px solid var(--border-color); color: var(--text-color); font-weight: bold; border-radius: 8px; cursor: pointer; }
 
-        /* 🎂 명언 & 생일 특별 영역 (다크모드 글씨 검은색) */
-        .quote-card { 
-            background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%); 
-            border: 1px solid #dce1e4; text-align: center; padding: 40px 20px; margin-top: 30px; 
-        }
-        body.dark-mode .quote-card { 
-            background: linear-gradient(135deg, #e0e5e8 0%, #f0f2f5 100%); 
-            border-color: #bbb;
-        }
+        /* 🎂 명언 (다크모드 글씨 검은색) */
+        .quote-card { background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%); border: 1px solid #dce1e4; text-align: center; padding: 40px 20px; margin-top: 30px; }
+        body.dark-mode .quote-card { background: linear-gradient(135deg, #e0e5e8 0%, #f0f2f5 100%); border-color: #bbb; }
         body.dark-mode .quote-text { color: #000000 !important; } 
         body.dark-mode .quote-author { color: #333333 !important; } 
 
-        .quote-card.birthday-mode { 
-            background: linear-gradient(135deg, #fff0f0 0%, #ffe0e0 100%); 
-            border-color: #ffcccc; box-shadow: 0 0 20px rgba(231, 76, 60, 0.2); 
-        }
+        .quote-card.birthday-mode { background: linear-gradient(135deg, #fff0f0 0%, #ffe0e0 100%); border-color: #ffcccc; box-shadow: 0 0 20px rgba(231, 76, 60, 0.2); }
         body.dark-mode .quote-card.birthday-mode { background: linear-gradient(135deg, #ffe0e0 0%, #ffd0d0 100%); }
         .quote-card.birthday-mode .quote-text, body.dark-mode .quote-card.birthday-mode .quote-text { color: var(--heart-color) !important; font-weight: bold; font-size: 1.6em; }
         
@@ -212,30 +202,37 @@
         </div>
 
         <div class="card">
-            <div class="dashboard-layout" id="main-dashboard-layout">
+            <div class="sidebar-tabs">
+                <button id="tab-it" class="tab-btn active" onclick="switchTab('it')">💻 IT 대장주</button>
+                <button id="tab-trend" class="tab-btn" onclick="switchTab('trend')">🔥 실시간 주도주</button>
+            </div>
+
+            <div id="it-mode-content">
                 <div class="stock-sidebar">
-                    <div class="sidebar-tabs">
-                        <button id="tab-it" class="tab-btn active" onclick="switchTab('it')">💻 IT 대장주</button>
-                        <button id="tab-trend" class="tab-btn" onclick="switchTab('trend')">🔥 실시간 주도주</button>
-                    </div>
                     <div id="stock-list-wrapper">
                         <div class="stock-list-container" id="stock-list">
-                            <div class="loading-text">⏳ 데이터를 불러오는 중입니다...</div>
+                            <div class="loading-text">⏳ 데이터 로딩 중...</div>
                         </div>
                     </div>
                 </div>
                 <div class="main-chart-area">
                     <div class="chart-header"><h2 id="chart-main-title">📊 실시간 증시 현황</h2></div>
                     <div id="chart-container">
-                        <div class="loading-text" style="padding-top: 100px;">📊 차트를 안전하게<br>가져오는 중입니다...</div>
-                    </div>
-                    <div class="company-news-area">
-                        <h3 id="company-news-title">📰 기업 관련 뉴스</h3>
-                        <ul class="company-news-list" id="company-news-list">
-                            <li><div class="loading-text" style="padding:10px;">뉴스를 가져오는 중입니다...</div></li>
-                        </ul>
+                        <div class="loading-text" style="padding-top: 100px;">📊 차트를 안전하게 가져오는 중입니다...</div>
                     </div>
                 </div>
+            </div>
+
+            <div id="trend-mode-content">
+                <div class="chart-header"><h2 id="trend-main-title">📊 미국 증시 실시간 핫리스트</h2></div>
+                <div id="trend-widget-wrapper"></div>
+            </div>
+
+            <div class="company-news-area">
+                <h3 id="company-news-title">📰 기업 관련 뉴스</h3>
+                <ul class="company-news-list" id="company-news-list">
+                    <li><div class="loading-text" style="padding:10px;">뉴스를 가져오는 중입니다...</div></li>
+                </ul>
             </div>
         </div>
 
@@ -269,6 +266,7 @@
         let currentActiveStock = null;
         let allGlobalNews = [];
         let currentlyDisplayedGlobalNews = 5;
+        let isTrendWidgetLoaded = false; // 주도주 위젯이 로딩되었는지 체크하는 스위치
 
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1479009818688618609/rDkprTq53ZHmaF6_ROZlBCz7asjPmAE9gmEoQipoC3gTpAu7PkVoFUUQCoHvEdSpjffL";
 
@@ -278,112 +276,51 @@
             document.getElementById('current-time').innerText = "기준: " + now.toLocaleString('ko-KR', options);
         }
 
-        function startHeartAnimation() {
-            const container = document.getElementById('heart-container');
-            container.style.display = 'block'; 
+        // 🌟 [핵심] 화면을 부수지 않고 숨겼다 보여주기만 하는 완벽한 탭 전환!
+        function switchTab(tabName) {
+            currentTab = tabName;
             
-            setInterval(() => {
-                const heart = document.createElement('div');
-                heart.classList.add('floating-heart');
-                heart.innerText = '♥'; 
-                heart.style.left = Math.random() * 100 + 'vw';
-                heart.style.animationDuration = Math.random() * 3 + 4 + 's';
-                heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
-                container.appendChild(heart);
-                setTimeout(() => { heart.remove(); }, 7000); 
-            }, 400); 
-        }
+            // 버튼 색상 변경
+            document.getElementById('tab-it').classList.toggle('active', tabName === 'it');
+            document.getElementById('tab-trend').classList.toggle('active', tabName === 'trend');
 
-        function sendHeartToDaughter() {
-            const btn = document.getElementById('heart-send-btn');
-            const originalText = btn.innerText;
-            btn.innerText = "✨ 하트 전송 완료!";
-            btn.disabled = true;
+            const itRoom = document.getElementById('it-mode-content');
+            const trendRoom = document.getElementById('trend-mode-content');
 
-            let totalClicks = parseInt(localStorage.getItem('daddy_heart_total_clicks') || '0');
-            totalClicks++;
-            localStorage.setItem('daddy_heart_total_clicks', totalClicks);
+            if (tabName === 'it') {
+                trendRoom.style.display = 'none';   // 주도주 방 닫기
+                itRoom.style.display = 'flex';      // IT 방 열기 (원래 레이아웃인 flex 적용)
+                
+                document.getElementById('company-news-title').innerText = currentActiveStock ? `📰 ${currentActiveStock.keyword} 최근 관련 뉴스` : `📰 기업 관련 뉴스`;
+                if(currentActiveStock) fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5);
+            } 
+            else {
+                itRoom.style.display = 'none';      // IT 방 닫기
+                trendRoom.style.display = 'block';  // 주도주 방 열기
 
-            let realHeartCount = totalClicks - 5;
+                document.getElementById('company-news-title').innerText = `📰 미국 증시 주요 뉴스`;
+                fetchRealTimeNews("미국 증시", 'company-news-list', 5);
 
-            if (realHeartCount > 0 && realHeartCount % 100 === 0) {
-                showGiantHeart(realHeartCount);
+                // 주도주 위젯이 한 번도 안 만들어졌을 때 딱 1번만 만듭니다! (무한 로딩 및 씹힘 방지)
+                if (!isTrendWidgetLoaded) {
+                    const wrapper = document.getElementById('trend-widget-wrapper');
+                    wrapper.innerHTML = '<div class="loading-text" style="padding-top:150px;">⏳ 실시간 핫리스트 데이터를 스캔 중입니다...</div>';
+                    
+                    // 방이 열리고 나서 크기를 잡을 수 있도록 0.1초 뒤에 스크립트 실행
+                    setTimeout(() => {
+                        wrapper.innerHTML = '';
+                        const script = document.createElement('script');
+                        script.src = "https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js";
+                        script.async = true;
+                        script.innerHTML = JSON.stringify({
+                            "colorTheme": isDarkMode ? "dark" : "light", "dateRange": "12M", "exchange": "US", "showChart": true, "locale": "kr", "width": "100%", "height": "100%", "largeChartUrl": "", "isTransparent": true, "showSymbolLogo": true, "showFloatingTooltip": false
+                        });
+                        wrapper.appendChild(script);
+                        isTrendWidgetLoaded = true; // 이제 만들어졌다고 체크!
+                    }, 100);
+                }
             }
-
-            const sweetMessages = [
-                "💖 [아빠의 하트 도착!] 아빠가 우리 예쁜 딸을 생각하며 방금 하트를 꾹 눌렀어요! 오늘도 딸 덕분에 아빠는 행복합니다. 🥰",
-                "💖 [사랑의 알림] 세상에서 제일 든든한 우리 아빠가 예쁜 딸에게 사랑을 보냈습니다! 오늘 하루도 화이팅! 💕",
-                "💖 [아빠의 마음] 띠링~ 아빠가 대시보드를 보다가 우리 딸 생각이 나서 하트를 보냈어요! 아빠의 비타민은 역시 우리 딸! 🍓",
-                "💖 [행복 전송] 아빠가 방금 활짝 웃으시며 하트를 보냈습니다! 예쁘게 만들어줘서 고맙다는 아빠의 작은 선물이에요. 🎁"
-            ];
-            
-            let randomMsg = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
-            let finalMessage = randomMsg;
-            
-            if(realHeartCount > 0) {
-                finalMessage += `\n*(딸에게 보낸 ${realHeartCount}번째 사랑입니다!)*`;
-            } else {
-                finalMessage += `\n*(버튼 테스트 중입니다. 실제 카운트는 6번째부터 시작됩니다!)*`;
-            }
-
-            fetch(DISCORD_WEBHOOK_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ content: `${finalMessage}\n(보낸 시간: ${new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})})` })
-            }).catch(e => console.log("전송 오류"));
-
-            setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
         }
-
-        function showGiantHeart(count) {
-            const overlay = document.getElementById('giant-heart-overlay');
-            document.getElementById('giant-heart-msg').innerHTML = `🎉 세상에! 🎉<br>우리 예쁜 딸에게<br>하트를 벌써 <span style="color:#ffb6b9; font-size:1.5em;">${count}</span>번이나 보내셨어요!<br><br>아빠의 사랑이 듬뿍 쌓였습니다 💖`;
-            overlay.style.display = 'flex';
-            setTimeout(() => { overlay.style.display = 'none'; }, 5000);
-        }
-
-        const lunarBirthdayToSolar = { 
-            2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02",
-            2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07",
-            2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10",
-            2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16",
-            2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19",
-            2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" 
-        };
-
-        const fatherQuotes = [
-            { text: "나이를 먹는다는 것은 등산을 하는 것과 같다. 오를수록 숨은 차지만, 시야는 점점 넓어진다.", author: "잉그마르 베르히만" },
-            { text: "청춘은 나이가 아니라 마음의 상태에 있다. 당신의 가장 눈부신 시절은 아직 오지 않았다.", author: "사무엘 울만" },
-            { text: "은퇴는 마침표가 아니라, 당신이 진정 원했던 삶을 향해 긋는 새로운 밑줄입니다.", author: "리처드 라이더" },
-            { text: "무언가를 시작하기에 너무 늦은 나이란 결코 없다. 오늘이 당신의 남은 인생 중 가장 젊은 날이다.", author: "C.S. 루이스" },
-            { text: "인생의 전반전이 성공을 쫓는 시간이었다면, 후반전은 의미를 찾아가는 아름다운 여정이다.", author: "칼 융" },
-            { text: "가장 훌륭한 일은 아직 시작되지 않았다. 최고의 날들은 아직 살아보지 않은 날들이다.", author: "토마스 머튼" },
-            { text: "나무는 겨울에 자라지 않는 것처럼 보이지만, 사실은 다가올 봄을 위해 가장 깊고 단단한 뿌리를 내리고 있습니다.", author: "작자 미상" },
-            { text: "성공이란 늙어가는 것을 두려워하지 않고, 매 순간을 자신의 속도에 맞춰 당당하게 걸어가는 것이다.", author: "알베르 카뮈" },
-            { text: "당신이 지금까지 살아온 모든 순간이, 앞으로 살아갈 날들을 위한 가장 완벽한 준비 운동이었습니다.", author: "작자 미상" },
-            { text: "인생의 2막은 지금까지 쌓아온 지혜와 여유를 마음껏 펼칠 수 있는 진정한 황금기입니다.", author: "작자 미상" },
-            { text: "아름다운 노후는 그동안 흘린 땀방울이 만들어낸 가장 값진 훈장입니다.", author: "작자 미상" },
-            { text: "당신의 50대는 지난 세월의 지혜와 다가올 시간의 여유가 만나는 아름다운 교차로입니다.", author: "작자 미상" },
-            { text: "진정한 여행은 새로운 풍경을 보는 것이 아니라, 새로운 눈을 가지는 데 있다.", author: "마르셀 프루스트" },
-            { text: "행복은 산꼭대기에 있는 것이 아니라, 산을 오르는 과정 곳곳에 피어 있습니다.", author: "작자 미상" },
-            { text: "가장 깊은 밤에 가장 빛나는 별이 뜹니다. 아버지의 인생 2막은 그 어느 때보다 빛날 것입니다.", author: "작자 미상" },
-            { text: "나이는 숫자에 불과하다. 중요한 것은 당신이 품고 있는 꿈과 열정의 크기이다.", author: "작자 미상" },
-            { text: "때로는 속도를 늦추고 주변의 풍경을 감상하는 것이, 더 멀리 가는 가장 좋은 방법입니다.", author: "작자 미상" },
-            { text: "가장 위대한 유산은 재물이 아니라, 아버지가 보여주신 묵묵한 성실함과 따뜻한 사랑입니다.", author: "작자 미상" },
-            { text: "지금까지는 가족을 위해 달렸다면, 이제는 온전히 아버지만을 위한 왈츠를 추실 시간입니다.", author: "작자 미상" },
-            { text: "오랜 세월 비바람을 견뎌낸 거목만이 가장 시원한 그늘을 만들어 줍니다. 감사합니다.", author: "작자 미상" },
-            { text: "새로운 시작을 두려워하지 마세요. 당신의 경험이라는 나침반이 가장 정확한 길을 안내할 것입니다.", author: "작자 미상" },
-            { text: "인생은 속도가 아니라 방향입니다. 이제는 마음이 이끄는 방향으로 걸어가세요.", author: "괴테" },
-            { text: "수십 년의 성실함으로 지어 올린 당신의 인생은 그 어떤 빌딩보다 견고하고 아름답습니다.", author: "작자 미상" },
-            { text: "은퇴는 직업에서 물러나는 가장 빛나는 첫걸음입니다.", author: "작자 미상" },
-            { text: "매일 아침 눈을 뜨는 것이 기대되는 삶, 그것이 당신이 맞이할 인생의 두 번째 봄입니다.", author: "작자 미상" },
-            { text: "과거를 자랑스러워하고, 현재를 즐기며, 미래를 기대하십시오. 당신은 충분히 그럴 자격이 있습니다.", author: "작자 미상" },
-            { text: "인생의 해질녘이 일출보다 아름다운 이유는, 하루 종일 품었던 따뜻한 온기를 머금고 있기 때문입니다.", author: "작자 미상" },
-            { text: "어떤 길을 가더라도 당신의 발걸음에는 지혜가 묻어날 것입니다. 자신을 믿고 나아가세요.", author: "작자 미상" },
-            { text: "가장 평범한 일상이 가장 위대한 행복임을 아는 나이, 지금이 바로 당신의 황금기입니다.", author: "작자 미상" },
-            { text: "수많은 위기를 묵묵히 이겨낸 당신의 굳은살 배인 손을 존경합니다. 이제는 여유를 쥐어보세요.", author: "작자 미상" },
-            { text: "당신의 존재 자체가 우리 가족의 가장 큰 축복이자 자랑입니다. 앞으로의 매일이 축제이길 바랍니다.", author: "가족 일동" }
-        ];
 
         const itStocks = [
             { symbol: 'NASDAQ:NVDA', name: '엔비디아', keyword: '엔비디아' }, { symbol: 'NASDAQ:TSLA', name: '테슬라', keyword: '테슬라' },
@@ -393,55 +330,16 @@
             { symbol: 'NASDAQ:AVGO', name: '브로드컴', keyword: '브로드컴' }
         ];
 
-        // 🌟 레이아웃 트랜스포머 스위치 🌟
-        function switchTab(tabName) {
-            currentTab = tabName;
-            const layout = document.getElementById('main-dashboard-layout');
-            const wrapper = document.getElementById('stock-list-wrapper');
-            
-            document.getElementById('tab-it').classList.toggle('active', tabName === 'it');
-            document.getElementById('tab-trend').classList.toggle('active', tabName === 'trend');
-
-            wrapper.innerHTML = '<div class="stock-list-container" id="stock-list"><div class="loading-text">⏳ 데이터를 불러오는 중입니다...</div></div>';
-
-            setTimeout(() => {
-                if (tabName === 'it') {
-                    // IT 대장주 모드 (원상복구)
-                    layout.classList.remove('trend-mode');
-                    setupStockList(itStocks);
-                    setActiveStock(itStocks[0]); 
-                } else {
-                    // 🔥 실시간 주도주 모드 (전체 확장) 🔥
-                    layout.classList.add('trend-mode');
-                    wrapper.innerHTML = '';
-                    const widgetDiv = document.createElement('div');
-                    widgetDiv.className = "trend-widget-container"; 
-                    
-                    const script = document.createElement('script');
-                    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js";
-                    script.async = true;
-                    script.innerHTML = JSON.stringify({
-                        "colorTheme": isDarkMode ? "dark" : "light", "dateRange": "12M", "exchange": "US", "showChart": true, "locale": "kr", "width": "100%", "height": "100%", "largeChartUrl": "", "isTransparent": true, "showSymbolLogo": true, "showFloatingTooltip": false
-                    });
-                    
-                    widgetDiv.appendChild(script);
-                    wrapper.appendChild(widgetDiv);
-                }
-            }, 50); 
-        }
-
-        // 도미노 로딩
-        function setupStockList(stockArray) {
+        // IT 주식 리스트 최초 1회만 도미노 로딩
+        function initStockList() {
             const container = document.getElementById('stock-list');
             container.innerHTML = ''; 
             const themeStr = isDarkMode ? "dark" : "light";
             
-            stockArray.forEach((stock, index) => {
+            itStocks.forEach((stock, index) => {
                 const item = document.createElement('div'); 
                 item.className = 'stock-item'; 
                 item.dataset.symbol = stock.symbol;
-                
-                if(currentActiveStock && stock.symbol === currentActiveStock.symbol) item.classList.add('active');
                 
                 const overlay = document.createElement('div'); 
                 overlay.className = 'stock-item-overlay'; 
@@ -459,12 +357,13 @@
                     const script = document.createElement('script');
                     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-single-quote.js"; 
                     script.async = true;
-                    script.innerHTML = JSON.stringify({ 
-                        "symbol": stock.symbol, "width": "100%", "isTransparent": true, "colorTheme": themeStr, "locale": "kr" 
-                    });
+                    script.innerHTML = JSON.stringify({ "symbol": stock.symbol, "width": "100%", "isTransparent": true, "colorTheme": themeStr, "locale": "kr" });
                     widgetDiv.appendChild(script); 
                 }, index * 50); 
             });
+            
+            // 첫 번째 종목 자동 선택
+            setTimeout(() => { setActiveStock(itStocks[0]); }, 100);
         }
 
         function setActiveStock(stockObj) {
@@ -473,8 +372,7 @@
                 item.classList.toggle('active', item.dataset.symbol === stockObj.symbol); 
             });
             document.getElementById('chart-main-title').innerText = `📊 ${stockObj.name} 실시간 차트`;
-            
-            document.getElementById('chart-container').innerHTML = '<div class="loading-text" style="padding-top: 100px;">📊 차트를 불러오는 중입니다... 잠시만 기다려주세요.</div>';
+            document.getElementById('chart-container').innerHTML = '<div class="loading-text" style="padding-top: 100px;">📊 차트를 불러오는 중입니다...</div>';
             
             setTimeout(() => { renderChart(stockObj.symbol); }, 50);
             fetchRealTimeNews(stockObj.keyword, 'company-news-list', 5);
@@ -490,19 +388,13 @@
             let safeDateStr = pubDateStr;
             if (safeDateStr && !safeDateStr.includes('Z') && !safeDateStr.includes('+')) safeDateStr = safeDateStr.replace(' ', 'T') + 'Z';
             const dateObj = new Date(safeDateStr);
-            const month = dateObj.getMonth() + 1;
-            const date = dateObj.getDate();
-            const hours = String(dateObj.getHours()).padStart(2, '0');
-            const minutes = String(dateObj.getMinutes()).padStart(2, '0');
-            return `${month}/${date} ${hours}:${minutes}`;
+            return `${dateObj.getMonth() + 1}/${dateObj.getDate()} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
         }
 
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
-            if(listElementId === 'company-news-list') document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">뉴스를 가져오는 중입니다...</div></li>';
             
-            // 🚨 뉴스 오류 해결: 캐시 버스터 삭제하여 API 제한 막음 🚨
             let rssUrl = keyword ? `https://news.google.com/rss/search?q=${encodeURIComponent(keyword + " 주식 OR 경제")}&hl=ko&gl=KR&ceid=KR:ko` : `https://news.google.com/rss/search?q=${encodeURIComponent('경제 OR 증시 OR 금융')}&hl=ko&gl=KR&ceid=KR:ko`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
@@ -550,9 +442,82 @@
             container.appendChild(script);
         }
 
-        function toggleTheme() { isDarkMode = !isDarkMode; document.body.classList.toggle('dark-mode', isDarkMode); document.getElementById('theme-btn').innerText = isDarkMode ? "☀️" : "🌙"; switchTab(currentTab); renderExchangeWidget(); }
+        function toggleTheme() { 
+            isDarkMode = !isDarkMode; document.body.classList.toggle('dark-mode', isDarkMode); 
+            document.getElementById('theme-btn').innerText = isDarkMode ? "☀️" : "🌙"; 
+            
+            // 다크모드 시 트레이딩뷰 위젯 재로딩을 위해 스위치 초기화
+            isTrendWidgetLoaded = false;
+            initStockList();
+            renderExchangeWidget();
+            switchTab(currentTab); 
+        }
         
-        function refreshAll() { fetchRealTimeNews(null, 'global-news-list', null); if(currentTab === 'it') { fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5); setupStockList(itStocks); renderChart(currentActiveStock.symbol); } else { switchTab('trend'); } renderExchangeWidget(); }
+        function refreshAll() { 
+            fetchRealTimeNews(null, 'global-news-list', null); 
+            renderExchangeWidget();
+            if(currentTab === 'it') { 
+                fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5); 
+                initStockList(); 
+            } else { 
+                isTrendWidgetLoaded = false; // 주도주 재스캔을 위해 초기화
+                switchTab('trend'); 
+            } 
+        }
+
+        // 💖 100번 단위 하트 카운터 로직
+        function sendHeartToDaughter() {
+            const btn = document.getElementById('heart-send-btn');
+            const originalText = btn.innerText;
+            btn.innerText = "✨ 하트 전송 완료!";
+            btn.disabled = true;
+
+            let totalClicks = parseInt(localStorage.getItem('daddy_heart_total_clicks') || '0');
+            totalClicks++;
+            localStorage.setItem('daddy_heart_total_clicks', totalClicks);
+            let realHeartCount = totalClicks - 5;
+            if (realHeartCount > 0 && realHeartCount % 100 === 0) showGiantHeart(realHeartCount);
+
+            const sweetMessages = [
+                "💖 [아빠의 하트 도착!] 아빠가 우리 예쁜 딸을 생각하며 방금 하트를 꾹 눌렀어요! 오늘도 딸 덕분에 아빠는 행복합니다. 🥰",
+                "💖 [사랑의 알림] 세상에서 제일 든든한 우리 아빠가 예쁜 딸에게 사랑을 보냈습니다! 오늘 하루도 화이팅! 💕",
+                "💖 [아빠의 마음] 띠링~ 아빠가 대시보드를 보다가 우리 딸 생각이 나서 하트를 보냈어요! 아빠의 비타민은 역시 우리 딸! 🍓",
+                "💖 [행복 전송] 아빠가 방금 활짝 웃으시며 하트를 보냈습니다! 예쁘게 만들어줘서 고맙다는 아빠의 작은 선물이에요. 🎁"
+            ];
+            
+            let finalMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
+            if(realHeartCount > 0) finalMessage += `\n*(딸에게 보낸 ${realHeartCount}번째 사랑입니다!)*`;
+            else finalMessage += `\n*(버튼 테스트 중입니다. 실제 카운트는 6번째부터 시작됩니다!)*`;
+
+            fetch(DISCORD_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `${finalMessage}\n(보낸 시간: ${new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})})` }) }).catch(e => console.log("전송 오류"));
+            setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
+        }
+
+        function showGiantHeart(count) {
+            const overlay = document.getElementById('giant-heart-overlay');
+            document.getElementById('giant-heart-msg').innerHTML = `🎉 세상에! 🎉<br>우리 예쁜 딸에게<br>하트를 벌써 <span style="color:#ffb6b9; font-size:1.5em;">${count}</span>번이나 보내셨어요!<br><br>아빠의 사랑이 듬뿍 쌓였습니다 💖`;
+            overlay.style.display = 'flex';
+            setTimeout(() => { overlay.style.display = 'none'; }, 5000);
+        }
+
+        function startHeartAnimation() {
+            const container = document.getElementById('heart-container');
+            container.style.display = 'block'; 
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('floating-heart'); heart.innerText = '♥'; 
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = Math.random() * 3 + 4 + 's';
+                heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
+                container.appendChild(heart);
+                setTimeout(() => { heart.remove(); }, 7000); 
+            }, 400); 
+        }
+
+        const lunarBirthdayToSolar = { 2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02", 2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07", 2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10", 2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16", 2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19", 2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" };
+        const fatherQuotes = [
+            { text: "나이를 먹는다는 것은 등산을 하는 것과 같다. 오를수록 숨은 차지만, 시야는 점점 넓어진다.", author: "잉그마르 베르히만" }, { text: "청춘은 나이가 아니라 마음의 상태에 있다. 당신의 가장 눈부신 시절은 아직 오지 않았다.", author: "사무엘 울만" }, { text: "은퇴는 마침표가 아니라, 당신이 진정 원했던 삶을 향해 긋는 새로운 밑줄입니다.", author: "리처드 라이더" }, { text: "무언가를 시작하기에 너무 늦은 나이란 결코 없다. 오늘이 당신의 남은 인생 중 가장 젊은 날이다.", author: "C.S. 루이스" }, { text: "인생의 전반전이 성공을 쫓는 시간이었다면, 후반전은 의미를 찾아가는 아름다운 여정이다.", author: "칼 융" }, { text: "가장 훌륭한 일은 아직 시작되지 않았다. 최고의 날들은 아직 살아보지 않은 날들이다.", author: "토마스 머튼" }, { text: "나무는 겨울에 자라지 않는 것처럼 보이지만, 사실은 다가올 봄을 위해 가장 깊고 단단한 뿌리를 내리고 있습니다.", author: "작자 미상" }, { text: "성공이란 늙어가는 것을 두려워하지 않고, 매 순간을 자신의 속도에 맞춰 당당하게 걸어가는 것이다.", author: "알베르 카뮈" }, { text: "당신이 지금까지 살아온 모든 순간이, 앞으로 살아갈 날들을 위한 가장 완벽한 준비 운동이었습니다.", author: "작자 미상" }, { text: "인생의 2막은 지금까지 쌓아온 지혜와 여유를 마음껏 펼칠 수 있는 진정한 황금기입니다.", author: "작자 미상" }, { text: "아름다운 노후는 그동안 흘린 땀방울이 만들어낸 가장 값진 훈장입니다.", author: "작자 미상" }, { text: "당신의 50대는 지난 세월의 지혜와 다가올 시간의 여유가 만나는 아름다운 교차로입니다.", author: "작자 미상" }, { text: "진정한 여행은 새로운 풍경을 보는 것이 아니라, 새로운 눈을 가지는 데 있다.", author: "마르셀 프루스트" }, { text: "행복은 산꼭대기에 있는 것이 아니라, 산을 오르는 과정 곳곳에 피어 있습니다.", author: "작자 미상" }, { text: "가장 깊은 밤에 가장 빛나는 별이 뜹니다. 아버지의 인생 2막은 그 어느 때보다 빛날 것입니다.", author: "작자 미상" }, { text: "나이는 숫자에 불과하다. 중요한 것은 당신이 품고 있는 꿈과 열정의 크기이다.", author: "작자 미상" }, { text: "때로는 속도를 늦추고 주변의 풍경을 감상하는 것이, 더 멀리 가는 가장 좋은 방법입니다.", author: "작자 미상" }, { text: "가장 위대한 유산은 재물이 아니라, 아버지가 보여주신 묵묵한 성실함과 따뜻한 사랑입니다.", author: "작자 미상" }, { text: "지금까지는 가족을 위해 달렸다면, 이제는 온전히 아버지만을 위한 왈츠를 추실 시간입니다.", author: "작자 미상" }, { text: "오랜 세월 비바람을 견뎌낸 거목만이 가장 시원한 그늘을 만들어 줍니다. 감사합니다.", author: "작자 미상" }, { text: "새로운 시작을 두려워하지 마세요. 당신의 경험이라는 나침반이 가장 정확한 길을 안내할 것입니다.", author: "작자 미상" }, { text: "인생은 속도가 아니라 방향입니다. 이제는 마음이 이끄는 방향으로 걸어가세요.", author: "괴테" }, { text: "수십 년의 성실함으로 지어 올린 당신의 인생은 그 어떤 빌딩보다 견고하고 아름답습니다.", author: "작자 미상" }, { text: "은퇴는 직업에서 물러나는 가장 빛나는 첫걸음입니다.", author: "작자 미상" }, { text: "매일 아침 눈을 뜨는 것이 기대되는 삶, 그것이 당신이 맞이할 인생의 두 번째 봄입니다.", author: "작자 미상" }, { text: "과거를 자랑스러워하고, 현재를 즐기며, 미래를 기대하십시오. 당신은 충분히 그럴 자격이 있습니다.", author: "작자 미상" }, { text: "인생의 해질녘이 일출보다 아름다운 이유는, 하루 종일 품었던 따뜻한 온기를 머금고 있기 때문입니다.", author: "작자 미상" }, { text: "어떤 길을 가더라도 당신의 발걸음에는 지혜가 묻어날 것입니다. 자신을 믿고 나아가세요.", author: "작자 미상" }, { text: "가장 평범한 일상이 가장 위대한 행복임을 아는 나이, 지금이 바로 당신의 황금기입니다.", author: "작자 미상" }, { text: "수많은 위기를 묵묵히 이겨낸 당신의 굳은살 배인 손을 존경합니다. 이제는 여유를 쥐어보세요.", author: "작자 미상" }, { text: "당신의 존재 자체가 우리 가족의 가장 큰 축복이자 자랑입니다. 앞으로의 매일이 축제이길 바랍니다.", author: "가족 일동" }
+        ];
 
         function displayDailyQuote() {
             const today = new Date(); const year = today.getFullYear();
@@ -571,6 +536,7 @@
             isExchangeVisible = !isExchangeVisible; document.getElementById('exchange-container').classList.toggle('hidden'); document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 환율창 숨기기" : "💱 환율창 열기";
         });
 
+        // 🌟 브라우저 최초 로딩 🌟
         document.addEventListener("DOMContentLoaded", () => {
             updateTime();
             setInterval(updateTime, 1000);
@@ -581,8 +547,10 @@
                 fetchRealTimeNews(null, 'global-news-list', null);
             }, 100);
 
+            // 최초 화면 세팅 (IT 대장주 리스트 그리기)
             setTimeout(() => {
-                switchTab('it'); 
+                initStockList(); 
+                document.getElementById('it-mode-content').style.display = 'flex'; // 방 열기
             }, 300);
         });
 
