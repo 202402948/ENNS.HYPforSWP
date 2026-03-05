@@ -44,7 +44,7 @@
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         /* 📦 레이아웃 및 카드 */
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; position: relative; z-index: 10; }
+        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; position: relative; z-index: 1; }
         .header { text-align: center; margin-bottom: 20px; }
         #current-time { font-size: 0.9em; color: #888; }
         
@@ -53,34 +53,29 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid var(--border-color);
         }
 
-        /* 📊 대시보드 메인 영역 */
-        .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; position: relative; }
-        .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; position: relative; }
+        /* 📊 대시보드 메인 영역 (트랜스포머 레이아웃) */
+        .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; }
+        .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; transition: width 0.3s; }
+        .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
         
-        /* 🌟 [핵심해결] 터치 씹힘 완벽 차단: 스티키(Sticky) 캡슐 버튼 🌟 */
-        .sidebar-tabs { 
-            display: flex; gap: 10px; margin-bottom: 25px; 
-            position: sticky; top: 10px; /* 화면을 내려도 상단에 찰싹 붙어있음! */
-            z-index: 9999; /* 모든 위젯보다 무조건 위에 있음 */
-            background: var(--card-bg); /* 투명 방패를 막아주는 물리적 배경 */
-            padding: 12px; 
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15); /* 버튼 영역 강조 */
-            border: 1px solid var(--border-color);
-        }
+        /* 🌟 주도주 탭을 눌렀을 때 발동하는 화면 전체 확장 모드! 🌟 */
+        .dashboard-layout.trend-mode .stock-sidebar { width: 100%; } /* 좌측을 100%로 꽉 채움 */
+        .dashboard-layout.trend-mode .main-chart-area { display: none; } /* 우측 차트 영역 숨김 */
+
+        /* 탭 버튼 스타일 */
+        .sidebar-tabs { display: flex; gap: 10px; margin-bottom: 15px; }
         .tab-btn {
             flex: 1; padding: 15px 5px; border: 2px solid var(--border-color);
             background-color: var(--bg-color); color: var(--text-color);
             border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
             font-size: 1.1em;
-            -webkit-tap-highlight-color: transparent; 
-            user-select: none; /* 꾹 눌렀을 때 텍스트 선택 방지 */
-            touch-action: manipulation; /* 모바일 터치 최적화 */
         }
         .tab-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
         
-        #stock-list-wrapper { height: 650px; position: relative; clear: both; z-index: 1; }
-        .trend-widget-container { height: 100%; min-height: 600px; border-radius: 8px; overflow: hidden; position: relative; z-index: 1; }
+        #stock-list-wrapper { width: 100%; }
+        
+        /* 핫리스트 위젯 전용 넉넉한 공간 */
+        .trend-widget-container { height: 800px; width: 100%; border-radius: 8px; overflow: hidden; }
 
         .stock-list-container {
             max-height: 650px; overflow-y: auto; padding-right: 5px;
@@ -96,7 +91,6 @@
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
-        .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; position: relative; z-index: 1; }
         #chart-container { height: 500px; width: 100%; margin-bottom: 20px; }
         
         .company-news-area { padding-top: 15px; border-top: 2px dashed var(--border-color); }
@@ -110,10 +104,8 @@
         @media (max-width: 900px) {
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
+            .dashboard-layout.trend-mode .stock-sidebar { width: 100%; }
             
-            #stock-list-wrapper { height: auto; min-height: 0; } 
-            .trend-widget-container { height: 450px; min-height: 450px; } 
-
             .stock-list-container { 
                 flex-direction: row; overflow-x: auto; max-height: none; 
                 padding-bottom: 15px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; 
@@ -126,7 +118,7 @@
         }
 
         /* 💰 환율 및 뉴스 더보기 */
-        .exchange-wrapper { position: fixed; right: 20px; top: 80px; z-index: 10000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+        .exchange-wrapper { position: fixed; right: 20px; top: 80px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
         #toggle-exchange-btn { 
             background-color: var(--card-bg); color: var(--text-color); 
             border: 1px solid var(--border-color); padding: 8px 15px; 
@@ -141,13 +133,9 @@
         #global-news-list { list-style: none; padding: 0; margin: 0; min-height: 100px; }
         #global-news-list li { padding: 15px 0; border-bottom: 1px solid var(--border-color); }
         #global-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
-        .load-more-btn { 
-            display: block; width: 100%; padding: 12px; margin-top: 15px; 
-            background: transparent; border: 2px solid var(--border-color); 
-            color: var(--text-color); font-weight: bold; border-radius: 8px; cursor: pointer; 
-        }
+        .load-more-btn { display: block; width: 100%; padding: 12px; margin-top: 15px; background: transparent; border: 2px solid var(--border-color); color: var(--text-color); font-weight: bold; border-radius: 8px; cursor: pointer; }
 
-        /* 🎂 명언 & 생일 특별 영역 (다크모드 글씨 완벽 수정) */
+        /* 🎂 명언 & 생일 특별 영역 (다크모드 글씨 검은색) */
         .quote-card { 
             background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%); 
             border: 1px solid #dce1e4; text-align: center; padding: 40px 20px; margin-top: 30px; 
@@ -224,11 +212,11 @@
         </div>
 
         <div class="card">
-            <div class="dashboard-layout">
+            <div class="dashboard-layout" id="main-dashboard-layout">
                 <div class="stock-sidebar">
-                    <div class="sidebar-tabs" id="main-tabs">
-                        <button id="tab-it" class="tab-btn active">💻 IT 대장주</button>
-                        <button id="tab-trend" class="tab-btn">🔥 실시간 주도주</button>
+                    <div class="sidebar-tabs">
+                        <button id="tab-it" class="tab-btn active" onclick="switchTab('it')">💻 IT 대장주</button>
+                        <button id="tab-trend" class="tab-btn" onclick="switchTab('trend')">🔥 실시간 주도주</button>
                     </div>
                     <div id="stock-list-wrapper">
                         <div class="stock-list-container" id="stock-list">
@@ -281,17 +269,6 @@
         let currentActiveStock = null;
         let allGlobalNews = [];
         let currentlyDisplayedGlobalNews = 5;
-
-        // 🌟 [핵심] 탭 버튼 클릭 이벤트 강제 바인딩 (터치 씹힘 완벽 차단) 🌟
-        document.getElementById('tab-it').addEventListener('click', function(e) {
-            e.preventDefault(); // 쓸데없는 터치 이벤트 중복 차단
-            switchTab('it');
-        });
-
-        document.getElementById('tab-trend').addEventListener('click', function(e) {
-            e.preventDefault();
-            switchTab('trend');
-        });
 
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1479009818688618609/rDkprTq53ZHmaF6_ROZlBCz7asjPmAE9gmEoQipoC3gTpAu7PkVoFUUQCoHvEdSpjffL";
 
@@ -416,9 +393,12 @@
             { symbol: 'NASDAQ:AVGO', name: '브로드컴', keyword: '브로드컴' }
         ];
 
+        // 🌟 레이아웃 트랜스포머 스위치 🌟
         function switchTab(tabName) {
             currentTab = tabName;
+            const layout = document.getElementById('main-dashboard-layout');
             const wrapper = document.getElementById('stock-list-wrapper');
+            
             document.getElementById('tab-it').classList.toggle('active', tabName === 'it');
             document.getElementById('tab-trend').classList.toggle('active', tabName === 'trend');
 
@@ -426,9 +406,13 @@
 
             setTimeout(() => {
                 if (tabName === 'it') {
+                    // IT 대장주 모드 (원상복구)
+                    layout.classList.remove('trend-mode');
                     setupStockList(itStocks);
                     setActiveStock(itStocks[0]); 
                 } else {
+                    // 🔥 실시간 주도주 모드 (전체 확장) 🔥
+                    layout.classList.add('trend-mode');
                     wrapper.innerHTML = '';
                     const widgetDiv = document.createElement('div');
                     widgetDiv.className = "trend-widget-container"; 
@@ -442,11 +426,6 @@
                     
                     widgetDiv.appendChild(script);
                     wrapper.appendChild(widgetDiv);
-
-                    document.getElementById('chart-main-title').innerText = `📊 미국 증시 실시간 핫리스트`;
-                    document.getElementById('chart-container').innerHTML = '<div class="loading-text" style="padding-top: 100px;">안내: 실시간 주도주 탭에서는 개별 차트 대신<br>위쪽의 랭킹 보드에 집중해 주세요!</div>';
-                    
-                    fetchRealTimeNews(null, 'company-news-list', 5);
                 }
             }, 50); 
         }
@@ -523,8 +502,9 @@
             if(listElementId === 'company-news-list') document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">뉴스를 가져오는 중입니다...</div></li>';
             
+            // 🚨 뉴스 오류 해결: 캐시 버스터 삭제하여 API 제한 막음 🚨
             let rssUrl = keyword ? `https://news.google.com/rss/search?q=${encodeURIComponent(keyword + " 주식 OR 경제")}&hl=ko&gl=KR&ceid=KR:ko` : `https://news.google.com/rss/search?q=${encodeURIComponent('경제 OR 증시 OR 금융')}&hl=ko&gl=KR&ceid=KR:ko`;
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&_=${new Date().getTime()}`;
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
             fetch(apiUrl).then(res => res.json()).then(data => {
                 if(data.status !== "ok") throw new Error("API 오류");
@@ -572,7 +552,7 @@
 
         function toggleTheme() { isDarkMode = !isDarkMode; document.body.classList.toggle('dark-mode', isDarkMode); document.getElementById('theme-btn').innerText = isDarkMode ? "☀️" : "🌙"; switchTab(currentTab); renderExchangeWidget(); }
         
-        function refreshAll() { fetchRealTimeNews(null, 'global-news-list', null); if(currentTab === 'it') { fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5); setupStockList(itStocks); renderChart(currentActiveStock.symbol); } else { fetchRealTimeNews(null, 'company-news-list', 5); switchTab('trend'); } renderExchangeWidget(); }
+        function refreshAll() { fetchRealTimeNews(null, 'global-news-list', null); if(currentTab === 'it') { fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5); setupStockList(itStocks); renderChart(currentActiveStock.symbol); } else { switchTab('trend'); } renderExchangeWidget(); }
 
         function displayDailyQuote() {
             const today = new Date(); const year = today.getFullYear();
