@@ -256,10 +256,9 @@
                 "💖 [아빠의 마음] 띠링~ 아빠가 대시보드를 보다가 우리 딸 생각이 나서 하트를 보냈어요! 아빠의 비타민은 역시 우리 딸! 🍓",
                 "💖 [행복 전송] 아빠가 방금 활짝 웃으시며 하트를 보냈습니다! 예쁘게 만들어줘서 고맙다는 아빠의 작은 선물이에요. 🎁"
             ];
-            const randomMsg = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
             
             // 디스코드에 몇 번째 하트인지도 함께 보내주면 재밌겠죠?
-            let finalMessage = randomMsg;
+            let finalMessage = randomMsg = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
             if(realHeartCount > 0) {
                 finalMessage += `\n*(딸에게 보낸 ${realHeartCount}번째 사랑입니다!)*`;
             } else {
@@ -365,43 +364,32 @@
                 setupStockList(itStocks);
                 setActiveStock(itStocks[0]); 
             } else {
+                // 🌟 수정 완료: '핫리스트' 자동 위젯 적용! 🌟
                 wrapper.innerHTML = '';
                 const widgetDiv = document.createElement('div');
                 widgetDiv.style.height = "100%";
                 widgetDiv.style.minHeight = "600px";
                 
                 const script = document.createElement('script');
-                script.src = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
+                script.src = "https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js";
                 script.async = true;
                 script.innerHTML = JSON.stringify({
                     "colorTheme": isDarkMode ? "dark" : "light",
                     "dateRange": "12M",
-                    "showChart": false,
+                    "exchange": "US",
+                    "showChart": true,
                     "locale": "kr",
                     "width": "100%",
                     "height": "100%",
                     "largeChartUrl": "",
                     "isTransparent": true,
                     "showSymbolLogo": true,
-                    "tabs": [
-                        {
-                            "title": "미국 시총 상위",
-                            "symbols": [
-                                { "s": "NASDAQ:AAPL" }, { "s": "NASDAQ:MSFT" }, { "s": "NASDAQ:NVDA" },
-                                { "s": "NASDAQ:GOOGL" }, { "s": "NASDAQ:AMZN" }, { "s": "NASDAQ:META" }
-                            ]
-                        },
-                        {
-                            "title": "실시간 급등주",
-                            "symbols": [],
-                            "originalSymbol": ""
-                        }
-                    ]
+                    "showFloatingTooltip": false
                 });
                 widgetDiv.appendChild(script);
                 wrapper.appendChild(widgetDiv);
 
-                document.getElementById('chart-main-title').innerText = `📊 실시간 글로벌 시장 랭킹`;
+                document.getElementById('chart-main-title').innerText = `📊 미국 증시 실시간 핫리스트`;
                 document.getElementById('company-news-title').innerText = `📰 글로벌 경제 주요 뉴스`;
                 fetchRealTimeNews(null, 'company-news-list', 5);
             }
@@ -417,7 +405,6 @@
                 item.className = 'stock-item';
                 item.dataset.symbol = stock.symbol;
                 
-                // ✅ 수정 완료: null 에러 방지를 위한 조건 추가
                 if(currentActiveStock && stock.symbol === currentActiveStock.symbol) {
                     item.classList.add('active');
                 }
@@ -459,7 +446,6 @@
             fetchRealTimeNews(stockObj.keyword, 'company-news-list', 5);
         }
 
-        // ✅ 수정 완료: 트레이딩뷰 안정화를 위한 tv.js 위젯 렌더링 방식 적용
         function renderChart(symbol) {
             const container = document.getElementById('chart-container');
             container.innerHTML = ''; 
