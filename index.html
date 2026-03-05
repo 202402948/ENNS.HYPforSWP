@@ -241,8 +241,35 @@
         let allGlobalNews = [];
         let currentlyDisplayedGlobalNews = 5;
 
+        // 디스코드 웹후크 URL
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1479009818688618609/rDkprTq53ZHmaF6_ROZlBCz7asjPmAE9gmEoQipoC3gTpAu7PkVoFUUQCoHvEdSpjffL";
 
+        // 🌟 [복구 완료] 시간 업데이트 함수
+        function updateTime() {
+            const now = new Date();
+            const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('current-time').innerText = "기준: " + now.toLocaleString('ko-KR', options);
+        }
+
+        // 🌟 [복구 완료] 생일 하트 폭죽 애니메이션 함수
+        function startHeartAnimation() {
+            const container = document.getElementById('heart-container');
+            container.style.display = 'block'; 
+            
+            setInterval(() => {
+                const heart = document.createElement('div');
+                heart.classList.add('floating-heart');
+                heart.innerText = '♥'; 
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animationDuration = Math.random() * 3 + 4 + 's';
+                heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
+                container.appendChild(heart);
+                
+                setTimeout(() => { heart.remove(); }, 7000); 
+            }, 400); 
+        }
+
+        // 💖 하트 보내기 로직
         function sendHeartToDaughter() {
             const btn = document.getElementById('heart-send-btn');
             const originalText = btn.innerText;
@@ -266,7 +293,8 @@
                 "💖 [행복 전송] 아빠가 방금 활짝 웃으시며 하트를 보냈습니다! 예쁘게 만들어줘서 고맙다는 아빠의 작은 선물이에요. 🎁"
             ];
             
-            let finalMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
+            let randomMsg = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
+            let finalMessage = randomMsg;
             
             if(realHeartCount > 0) {
                 finalMessage += `\n*(딸에게 보낸 ${realHeartCount}번째 사랑입니다!)*`;
@@ -371,13 +399,12 @@
                     document.getElementById('chart-main-title').innerText = `📊 미국 증시 실시간 핫리스트`;
                     document.getElementById('chart-container').innerHTML = '<div class="loading-text" style="padding-top: 100px;">안내: 실시간 주도주 탭에서는 개별 차트 대신<br>위쪽의 랭킹 보드에 집중해 주세요!</div>';
                     
-                    // 주도주 탭에서도 글로벌 뉴스는 따로 불러오도록 처리
                     fetchRealTimeNews(null, 'company-news-list', 5);
                 }
             }, 50); 
         };
 
-        // 🌟 핵심: 리스트를 0.15초 간격으로 하나씩 '도미노'처럼 그립니다! 🌟
+        // 🌟 도미노 로딩: 브라우저가 멈추지 않게 0.05초 간격으로 주식 위젯을 하나씩 그립니다.
         function setupStockList(stockArray) {
             const container = document.getElementById('stock-list');
             container.innerHTML = ''; 
@@ -395,14 +422,13 @@
                 overlay.onclick = () => { setActiveStock(stock); };
                 
                 const widgetDiv = document.createElement('div'); 
-                // 처음엔 가벼운 글씨만 띄워둡니다.
-                widgetDiv.innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:0.9em;">${stock.name} 불러오는 중...</div>`;
+                widgetDiv.innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:0.9em;">${stock.name} 대기 중...</div>`;
                 
                 item.appendChild(overlay); 
                 item.appendChild(widgetDiv); 
                 container.appendChild(item);
 
-                // 0.15초마다 하나씩 진짜 위젯으로 교체! (모바일 멈춤 완벽 방지)
+                // 도미노처럼 순차적으로 렌더링
                 setTimeout(() => {
                     widgetDiv.innerHTML = ''; 
                     const script = document.createElement('script');
@@ -412,7 +438,7 @@
                         "symbol": stock.symbol, "width": "100%", "isTransparent": true, "colorTheme": themeStr, "locale": "kr" 
                     });
                     widgetDiv.appendChild(script); 
-                }, index * 150); 
+                }, index * 50); 
             });
         }
 
@@ -509,7 +535,7 @@
 
             if (lunarBirthdayToSolar[year] === todayStr) {
                 quoteCard.classList.add('birthday-mode'); textEl.innerHTML = "🎉 아빠 생신 축하해요!! 즐겁고 멋진 하루 보내세요 ♥ 🎉"; textEl.style.fontWeight = "bold"; textEl.style.fontSize = "1.6em"; authorEl.innerText = "- 사랑하는 딸 올림 -";
-                if(typeof startHeartAnimation === 'function') startHeartAnimation(); return; 
+                startHeartAnimation(); return; 
             }
             const selectedQuote = fatherQuotes[(today.getDate() - 1) % fatherQuotes.length];
             quoteCard.classList.remove('birthday-mode'); textEl.style.fontWeight = "normal"; textEl.style.fontSize = "1.3em"; textEl.innerText = `"${selectedQuote.text}"`; authorEl.innerText = `- ${selectedQuote.author} -`;
@@ -521,7 +547,10 @@
 
         // 🌟 브라우저 숨통 트여주기! 데이터 분산 로딩 시작 🌟
         document.addEventListener("DOMContentLoaded", () => {
+            // 삭제되었던 시계 함수 복구 완료!
             updateTime();
+            setInterval(updateTime, 1000);
+
             displayDailyQuote(); 
             
             // 1. 환율과 글로벌 뉴스부터 불러옵니다.
@@ -530,10 +559,10 @@
                 fetchRealTimeNews(null, 'global-news-list', null);
             }, 100);
 
-            // 2. 주식 탭은 가장 마지막에 여유를 두고 시작합니다.
+            // 2. 도미노 로딩이 적용된 주식 탭은 가장 마지막에 여유를 두고 시작합니다.
             setTimeout(() => {
                 switchTab('it'); 
-            }, 400);
+            }, 300);
         });
 
     </script>
