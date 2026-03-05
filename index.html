@@ -47,6 +47,7 @@
         .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; position: relative; z-index: 10; }
         .header { text-align: center; margin-bottom: 20px; }
         #current-time { font-size: 0.9em; color: #888; }
+        
         .card {
             background-color: var(--card-bg); border-radius: 12px; padding: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid var(--border-color);
@@ -54,18 +55,21 @@
 
         /* 📊 대시보드 메인 영역 */
         .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; }
-        .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; }
+        .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; position: relative; z-index: 20; }
         
-        .sidebar-tabs { display: flex; gap: 5px; margin-bottom: 15px; position: relative; z-index: 20; }
+        /* 🌟 터치 씹힘 방지: 탭 버튼을 무조건 최상단으로 끌어올림 */
+        .sidebar-tabs { display: flex; gap: 5px; margin-bottom: 15px; position: relative; z-index: 9999; }
         .tab-btn {
-            flex: 1; padding: 10px; border: 1px solid var(--border-color);
+            flex: 1; padding: 12px 5px; border: 1px solid var(--border-color);
             background-color: var(--bg-color); color: var(--text-color);
             border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            font-size: 1.05em; /* 모바일 터치를 위해 살짝 키움 */
         }
         .tab-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
         
-        #stock-list-wrapper { height: 650px; position: relative; }
-        .trend-widget-container { height: 100%; min-height: 600px; }
+        /* 🌟 광활한 빈 공간 해결 🌟 */
+        #stock-list-wrapper { position: relative; width: 100%; }
+        .trend-widget-container { height: 600px; position: relative; z-index: 10; overflow: hidden; border-radius: 8px; }
 
         .stock-list-container {
             max-height: 650px; overflow-y: auto; padding-right: 5px;
@@ -81,22 +85,24 @@
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
-        .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
+        .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; position: relative; z-index: 10; }
         #chart-container { height: 500px; width: 100%; margin-bottom: 20px; }
         
         .company-news-area { padding-top: 15px; border-top: 2px dashed var(--border-color); }
-        .company-news-list { list-style: none; padding: 0; margin: 0; min-height: 100px; }
+        .company-news-list { list-style: none; padding: 0; margin: 0; min-height: 80px; }
         .company-news-list li { padding: 10px 0; border-bottom: 1px solid var(--border-color); }
         .company-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; }
 
-        .loading-text { text-align: center; padding: 20px; color: #888; font-weight: bold; font-size: 1em; line-height: 1.5; }
+        .loading-text { text-align: center; padding: 30px; color: #888; font-weight: bold; font-size: 1.1em; line-height: 1.5; }
 
-        /* 📱 모바일 최적화 */
+        /* 📱 모바일 최적화 (유령 블록 완벽 제거) */
         @media (max-width: 900px) {
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
-            #stock-list-wrapper { height: auto; min-height: auto; } 
-            .trend-widget-container { height: 450px; min-height: 450px; } 
+            
+            /* 주식 탭의 껍데기 높이를 아예 초기화하여 빈 공간 삭제! */
+            #stock-list-wrapper { height: auto; min-height: 0; } 
+            .trend-widget-container { height: 450px; } /* 핫리스트가 열렸을 때만 높이 부여 */
 
             .stock-list-container { 
                 flex-direction: row; overflow-x: auto; max-height: none; 
@@ -120,12 +126,26 @@
         #global-news-list a { text-decoration: none; color: var(--text-color); font-size: 1.1em; }
         .load-more-btn { display: block; width: 100%; padding: 12px; margin-top: 15px; background: transparent; border: 2px solid var(--border-color); color: var(--text-color); font-weight: bold; border-radius: 8px; cursor: pointer; }
 
-        /* 🎂 명언 & 생일 특별 영역 */
-        .quote-card { background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%); border: 1px solid #dce1e4; text-align: center; padding: 40px 20px; margin-top: 30px; }
+        /* 🎂 명언 & 생일 특별 영역 (다크모드 글씨 색상 완벽 수정) */
+        .quote-card { 
+            background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%); 
+            border: 1px solid #dce1e4; text-align: center; padding: 40px 20px; margin-top: 30px; 
+        }
+        
+        /* 🌟 다크모드에서도 명언 카드는 돋보이게 밝은 톤 유지 & 글씨는 무조건 검은색! */
+        body.dark-mode .quote-card { 
+            background: linear-gradient(135deg, #e0e5e8 0%, #f0f2f5 100%); /* 카드 화사하게 유지 */
+            border-color: #bbb;
+        }
+        body.dark-mode .quote-text { color: #000000 !important; } /* 검은색 강제 지정 */
+        body.dark-mode .quote-author { color: #333333 !important; } /* 진한 회색 지정 */
+
         .quote-card.birthday-mode { background: linear-gradient(135deg, #fff0f0 0%, #ffe0e0 100%); border-color: #ffcccc; box-shadow: 0 0 20px rgba(231, 76, 60, 0.2); }
-        .quote-card.birthday-mode .quote-text { color: var(--heart-color); font-weight: bold; font-size: 1.6em; }
-        .quote-text { font-size: 1.3em; line-height: 1.6; margin-bottom: 15px; transition: 0.3s; }
-        .quote-author { font-size: 1.1em; color: #7f8c8d; font-weight: bold; }
+        body.dark-mode .quote-card.birthday-mode { background: linear-gradient(135deg, #ffe0e0 0%, #ffd0d0 100%); }
+        .quote-card.birthday-mode .quote-text, body.dark-mode .quote-card.birthday-mode .quote-text { color: var(--heart-color) !important; font-weight: bold; font-size: 1.6em; }
+        
+        .quote-text { font-size: 1.3em; line-height: 1.6; margin-bottom: 15px; transition: 0.3s; color: #111; }
+        .quote-author { font-size: 1.1em; color: #555; font-weight: bold; transition: 0.3s; }
 
         /* 💖 하트 버튼 컨테이너 */
         .heart-btn-container { text-align: center; margin-top: 50px; margin-bottom: 80px; }
@@ -143,8 +163,7 @@
 
         /* 🎁 거대 하트 마일스톤 이펙트 */
         #giant-heart-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.85); display: none; flex-direction: column;
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); display: none; flex-direction: column;
             justify-content: center; align-items: center; z-index: 20000; color: white; text-align: center;
         }
         .giant-heart-icon { font-size: 150px; color: var(--heart-color); animation: heartBeat 1s infinite; margin-bottom: 20px; }
@@ -244,14 +263,14 @@
         // 디스코드 웹후크 URL
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1479009818688618609/rDkprTq53ZHmaF6_ROZlBCz7asjPmAE9gmEoQipoC3gTpAu7PkVoFUUQCoHvEdSpjffL";
 
-        // 🌟 [복구 완료] 시간 업데이트 함수
+        // 🌟 시간 업데이트 함수
         function updateTime() {
             const now = new Date();
             const options = { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', hour: '2-digit', minute: '2-digit', second: '2-digit' };
             document.getElementById('current-time').innerText = "기준: " + now.toLocaleString('ko-KR', options);
         }
 
-        // 🌟 [복구 완료] 생일 하트 폭죽 애니메이션 함수
+        // 🌟 생일 하트 폭죽 애니메이션
         function startHeartAnimation() {
             const container = document.getElementById('heart-container');
             container.style.display = 'block'; 
@@ -264,12 +283,11 @@
                 heart.style.animationDuration = Math.random() * 3 + 4 + 's';
                 heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
                 container.appendChild(heart);
-                
                 setTimeout(() => { heart.remove(); }, 7000); 
             }, 400); 
         }
 
-        // 💖 하트 보내기 로직
+        // 💖 100단위 하트 카운터 로직
         function sendHeartToDaughter() {
             const btn = document.getElementById('heart-send-btn');
             const originalText = btn.innerText;
@@ -404,7 +422,7 @@
             }, 50); 
         };
 
-        // 🌟 도미노 로딩: 브라우저가 멈추지 않게 0.05초 간격으로 주식 위젯을 하나씩 그립니다.
+        // 🌟 도미노 로딩 (순차 렌더링)
         function setupStockList(stockArray) {
             const container = document.getElementById('stock-list');
             container.innerHTML = ''; 
@@ -428,7 +446,6 @@
                 item.appendChild(widgetDiv); 
                 container.appendChild(item);
 
-                // 도미노처럼 순차적으로 렌더링
                 setTimeout(() => {
                     widgetDiv.innerHTML = ''; 
                     const script = document.createElement('script');
@@ -545,21 +562,17 @@
             isExchangeVisible = !isExchangeVisible; document.getElementById('exchange-container').classList.toggle('hidden'); document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 환율창 숨기기" : "💱 환율창 열기";
         });
 
-        // 🌟 브라우저 숨통 트여주기! 데이터 분산 로딩 시작 🌟
+        // 🌟 브라우저 숨통 트여주기! 🌟
         document.addEventListener("DOMContentLoaded", () => {
-            // 삭제되었던 시계 함수 복구 완료!
             updateTime();
-            setInterval(updateTime, 1000);
-
+            setInterval(updateTime, 1000); // 🌟 시계 부활!! 🌟
             displayDailyQuote(); 
             
-            // 1. 환율과 글로벌 뉴스부터 불러옵니다.
             setTimeout(() => {
                 renderExchangeWidget();
                 fetchRealTimeNews(null, 'global-news-list', null);
             }, 100);
 
-            // 2. 도미노 로딩이 적용된 주식 탭은 가장 마지막에 여유를 두고 시작합니다.
             setTimeout(() => {
                 switchTab('it'); 
             }, 300);
