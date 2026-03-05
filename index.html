@@ -12,6 +12,7 @@
             --card-bg: #ffffff;
             --border-color: #dddddd;
             --accent-color: #e74c3c;
+            --heart-color: #d81b60; /* 하트 전용 색상 추가 */
             --btn-hover-bg: #f0f0f0;
         }
         body.dark-mode {
@@ -20,6 +21,7 @@
             --card-bg: #1e1e1e;
             --border-color: #333333;
             --btn-hover-bg: #2a2a2a;
+            --heart-color: #ffb6b9; /* 다크모드 하트 색상 */
         }
 
         body {
@@ -79,6 +81,9 @@
             border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
         .tab-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
+        
+        /* 🌟 리스트 영역 감싸는 래퍼 (위젯 교체용) 🌟 */
+        #stock-list-wrapper { height: 650px; position: relative; }
         
         .stock-list-container {
             max-height: 650px; overflow-y: auto; padding-right: 5px;
@@ -157,6 +162,17 @@
         }
         body.dark-mode .quote-author { color: #aab7b8; }
 
+        /* 💖 딸에게 하트 보내기 버튼 스타일 */
+        .heart-send-btn {
+            display: inline-block; margin-top: 25px; padding: 15px 30px; 
+            background-color: var(--heart-color); color: white; 
+            font-weight: bold; font-size: 1.2em; border: none; 
+            border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3);
+            transition: all 0.3s ease;
+        }
+        .heart-send-btn:disabled { background-color: #bbb; box-shadow: none; cursor: default; }
+        .heart-send-btn:hover:not(:disabled) { transform: scale(1.05); }
+
         /* 하트 애니메이션 */
         .heart-container {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -172,7 +188,7 @@
             100% { transform: translateY(-120vh) scale(1.5) rotate(360deg); opacity: 0; }
         }
 
-        /* 🌟 PC & 모바일 하이브리드 환율 UI 🌟 */
+        /* PC & 모바일 하이브리드 환율 UI */
         .exchange-wrapper {
             position: fixed; right: 20px; top: 80px; z-index: 1000;
             display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
@@ -195,6 +211,7 @@
         @media (max-width: 900px) {
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
+            #stock-list-wrapper { height: auto; min-height: 450px; } /* 모바일에서 위젯 공간 확보 */
             .stock-list-container { 
                 flex-direction: row; overflow-x: auto; max-height: none; 
                 padding-bottom: 15px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; 
@@ -202,7 +219,6 @@
             .stock-item { min-width: 280px; flex-shrink: 0; scroll-snap-align: start; }
             #chart-container { height: 280px; }
 
-            /* 환율창 모바일 최적화: 가리지 않고 깔끔하게 문서 사이에 배치 */
             .exchange-wrapper {
                 position: static;
                 align-items: stretch;
@@ -215,7 +231,7 @@
                 box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             }
             .floating-exchange.hidden {
-                display: none; /* 모바일에서는 부드러운 전환 대신 아예 공간을 없앰 */
+                display: none; 
             }
         }
 
@@ -256,9 +272,11 @@
                 <div class="stock-sidebar">
                     <div class="sidebar-tabs">
                         <button id="tab-it" class="tab-btn active" onclick="switchTab('it')">💻 IT 대장주</button>
-                        <button id="tab-trend" class="tab-btn" onclick="switchTab('trend')">🔥 요즘 뜨는 기업</button>
+                        <button id="tab-trend" class="tab-btn" onclick="switchTab('trend')">🔥 실시간 주도주</button>
                     </div>
-                    <div class="stock-list-container" id="stock-list"></div>
+                    <div id="stock-list-wrapper">
+                        <div class="stock-list-container" id="stock-list"></div>
+                    </div>
                 </div>
 
                 <div class="main-chart-area">
@@ -288,6 +306,8 @@
         <div class="card quote-card" id="quote-card-container">
             <div class="quote-text" id="daily-quote-text">명언을 불러오는 중입니다...</div>
             <div class="quote-author" id="daily-quote-author"></div>
+            
+            <button class="heart-send-btn" id="heart-send-btn" onclick="sendHeartToDaughter()">💖 예쁜 딸에게 하트 보내기</button>
         </div>
         
     </div>
@@ -305,6 +325,9 @@
         let allGlobalNews = [];
         let currentlyDisplayedGlobalNews = 5;
 
+        // 🚨 [여기에 디스코드 웹후크 주소를 붙여넣으세요!] 🚨
+        const DISCORD_WEBHOOK_URL = "여기에_웹후크_주소를_넣어주세요";
+
         const itStocks = [
             { symbol: 'NASDAQ:NVDA', name: '엔비디아', keyword: '엔비디아' },
             { symbol: 'NASDAQ:TSLA', name: '테슬라', keyword: '테슬라' },
@@ -317,16 +340,6 @@
             { symbol: 'NASDAQ:AVGO', name: '브로드컴', keyword: '브로드컴' },
             { symbol: 'NASDAQ:ASML', name: 'ASML', keyword: 'ASML' },
             { symbol: 'NASDAQ:AMD', name: 'AMD', keyword: 'AMD' }
-        ];
-
-        const trendStocks = [
-            { symbol: 'NASDAQ:PLTR', name: '팔란티어', keyword: '팔란티어' },
-            { symbol: 'NASDAQ:RKLB', name: '로켓랩', keyword: '로켓랩' },
-            { symbol: 'NASDAQ:ARM', name: 'ARM 홀딩스', keyword: 'ARM 홀딩스' },
-            { symbol: 'NASDAQ:MSTR', name: '마이크로스트레티지', keyword: '마이크로스트레티지' },
-            { symbol: 'NASDAQ:SMCI', name: '슈퍼마이크로', keyword: '슈퍼마이크로컴퓨터' },
-            { symbol: 'NASDAQ:CRWD', name: '크라우드스트라이크', keyword: '크라우드스트라이크' },
-            { symbol: 'NYSE:LLY', name: '일라이릴리', keyword: '일라이릴리' }
         ];
 
         let currentActiveStock = itStocks[0];
@@ -374,6 +387,40 @@
             2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24",
             2056: "03-13"
         };
+
+        // 💌 [추가1] 딸에게 하트 보내기 (달콤한 랜덤 메시지 기능)
+        function sendHeartToDaughter() {
+            const btn = document.getElementById('heart-send-btn');
+            const originalText = btn.innerText;
+            
+            // 시각적 효과
+            btn.innerText = "✨ 하트 전송 완료!";
+            btn.disabled = true;
+
+            // 4가지의 달콤한 무작위 메시지 배열
+            const sweetMessages = [
+                "💖 [아빠의 하트 도착!] 아빠가 우리 예쁜 딸을 생각하며 방금 하트를 꾹 눌렀어요! 오늘도 딸 덕분에 아빠는 행복합니다. 🥰",
+                "💖 [사랑의 알림] 세상에서 제일 든든한 우리 아빠가 예쁜 딸에게 사랑을 보냈습니다! 오늘 하루도 화이팅! 💕",
+                "💖 [아빠의 마음] 띠링~ 아빠가 대시보드를 보다가 우리 딸 생각이 나서 하트를 보냈어요! 아빠의 비타민은 역시 우리 딸! 🍓",
+                "💖 [행복 전송] 아빠가 방금 활짝 웃으시며 하트를 보냈습니다! 예쁘게 만들어줘서 고맙다는 아빠의 작은 선물이에요. 🎁"
+            ];
+            
+            const randomMsg = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
+
+            if(DISCORD_WEBHOOK_URL && DISCORD_WEBHOOK_URL.startsWith("http")) {
+                fetch(DISCORD_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: `${randomMsg}\n(보낸 시간: ${new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})})` })
+                }).catch(e => console.log("전송 오류"));
+            }
+
+            // 3초 후 버튼 원상복구
+            setTimeout(() => { 
+                btn.innerText = originalText; 
+                btn.disabled = false; 
+            }, 3000);
+        }
 
         function startHeartAnimation() {
             const container = document.getElementById('heart-container');
@@ -434,13 +481,61 @@
         }
         setInterval(updateTime, 1000); updateTime();
 
+        // 🔄 [추가2] 탭 전환 시 '실시간 주도주' 위젯 자동 삽입
         window.switchTab = function(tabName) {
             currentTab = tabName;
+            const wrapper = document.getElementById('stock-list-wrapper');
             document.getElementById('tab-it').classList.toggle('active', tabName === 'it');
             document.getElementById('tab-trend').classList.toggle('active', tabName === 'trend');
-            const targetList = (tabName === 'it') ? itStocks : trendStocks;
-            setupStockList(targetList);
-            setActiveStock(targetList[0]); 
+
+            if (tabName === 'it') {
+                // 기존 수동 IT 주식 리스트 표시
+                wrapper.innerHTML = '<div class="stock-list-container" id="stock-list"></div>';
+                setupStockList(itStocks);
+                setActiveStock(itStocks[0]); 
+            } else {
+                // 트레이딩뷰 실시간 주도주(시총 상위 및 급등주) 위젯 삽입
+                wrapper.innerHTML = '';
+                const widgetDiv = document.createElement('div');
+                widgetDiv.style.height = "100%";
+                widgetDiv.style.minHeight = "600px";
+                
+                const script = document.createElement('script');
+                script.src = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
+                script.async = true;
+                script.innerHTML = JSON.stringify({
+                    "colorTheme": isDarkMode ? "dark" : "light",
+                    "dateRange": "12M",
+                    "showChart": false,
+                    "locale": "kr",
+                    "width": "100%",
+                    "height": "100%",
+                    "largeChartUrl": "",
+                    "isTransparent": true,
+                    "showSymbolLogo": true,
+                    "tabs": [
+                        {
+                            "title": "미국 시총 상위",
+                            "symbols": [
+                                { "s": "NASDAQ:AAPL" }, { "s": "NASDAQ:MSFT" }, { "s": "NASDAQ:NVDA" },
+                                { "s": "NASDAQ:GOOGL" }, { "s": "NASDAQ:AMZN" }, { "s": "NASDAQ:META" }
+                            ]
+                        },
+                        {
+                            "title": "실시간 급등주",
+                            "symbols": [],
+                            "originalSymbol": ""
+                        }
+                    ]
+                });
+                widgetDiv.appendChild(script);
+                wrapper.appendChild(widgetDiv);
+
+                // 메인 차트 제목을 시장 랭킹으로 변경
+                document.getElementById('chart-main-title').innerText = `📊 실시간 글로벌 시장 랭킹`;
+                document.getElementById('company-news-title').innerText = `📰 글로벌 경제 주요 뉴스`;
+                fetchRealTimeNews(null, 'company-news-list', 5);
+            }
         };
 
         function setupStockList(stockArray) {
@@ -536,7 +631,7 @@
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
             if(listElementId === 'company-news-list') {
-                document.getElementById('company-news-title').innerText = `📰 ${keyword} 최근 관련 뉴스`;
+                document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
             }
             listEl.innerHTML = '<li>뉴스를 안전하게 불러오는 중입니다...</li>';
 
@@ -641,27 +736,27 @@
             document.body.classList.toggle('dark-mode', isDarkMode);
             document.getElementById('theme-btn').innerText = isDarkMode ? "☀️" : "🌙";
             
-            const targetList = (currentTab === 'it') ? itStocks : trendStocks;
-            setupStockList(targetList); 
-            renderChart(currentActiveStock.symbol);
+            // 테마 변경 시 현재 탭에 맞게 위젯 다시 렌더링
+            switchTab(currentTab); 
             renderExchangeWidget();
         });
 
         document.getElementById('refresh-btn').addEventListener('click', () => {
             fetchRealTimeNews(null, 'global-news-list', null);
-            fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5);
-            
-            const targetList = (currentTab === 'it') ? itStocks : trendStocks;
-            setupStockList(targetList);
-            renderChart(currentActiveStock.symbol);
+            if(currentTab === 'it') {
+                fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5);
+                setupStockList(itStocks);
+                renderChart(currentActiveStock.symbol);
+            } else {
+                fetchRealTimeNews(null, 'company-news-list', 5);
+                switchTab('trend'); // 주도주 탭 새로고침
+            }
             renderExchangeWidget();
         });
 
         // 초기 실행
-        setupStockList(itStocks);
-        setActiveStock(itStocks[0]); 
+        switchTab('it'); 
         renderExchangeWidget();
-        
         fetchRealTimeNews(null, 'global-news-list', null);
         displayDailyQuote(); 
 
