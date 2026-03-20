@@ -6,6 +6,11 @@
     <title>아빠를 위한 글로벌 IT & 경제 실시간 대시보드</title>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <style>
+        /* 🌟 [핵심 해결] 가로 삐져나감 방지: 모든 요소의 여백을 너비 안쪽으로 강제 포함! 🌟 */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
         /* 🎨 테마 및 기본 스타일 설정 */
         :root {
             --bg-color: #f4f7f6;
@@ -31,13 +36,13 @@
             color: var(--text-color);
             margin: 0; padding: 0;
             transition: background-color 0.3s, color 0.3s;
-            overflow-x: hidden;
+            overflow-x: hidden; /* 가로 스크롤 원천 차단 */
         }
 
         /* 🚀 뉴스 전광판 */
         .news-ticker {
             background-color: var(--card-bg); padding: 10px 0; border-bottom: 2px solid var(--border-color);
-            overflow: hidden; white-space: nowrap; position: relative; z-index: 10;
+            overflow: hidden; white-space: nowrap; position: relative; z-index: 10; width: 100%;
         }
         .ticker-content { display: inline-block; padding-left: 100%; animation: ticker 80s linear infinite; font-weight: bold; }
         .ticker-content span { margin-right: 50px; }
@@ -45,8 +50,9 @@
 
         /* 📦 레이아웃 전체 구조 (좌측 메모장 + 우측 메인) */
         .page-wrapper {
-            max-width: 1600px; margin: 20px auto; padding: 0 20px; 
+            max-width: 1600px; margin: 20px auto; padding: 0 15px; 
             display: flex; gap: 20px; align-items: flex-start; position: relative; z-index: 10;
+            width: 100%;
         }
 
         /* 📝 좌측 고정 매매 메모장 */
@@ -55,7 +61,7 @@
             display: flex; flex-direction: column; height: 85vh; min-height: 600px;
             background-color: var(--card-bg); border-radius: 12px; padding: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 1px solid var(--border-color);
-            box-sizing: border-box; transition: 0.3s; z-index: 15;
+            transition: 0.3s; z-index: 15;
         }
         .memo-date-btn {
             background-color: var(--btn-hover-bg); border: 1px solid var(--border-color);
@@ -66,25 +72,26 @@
         .memo-textarea {
             flex-grow: 1; width: 100%; border: 1px solid var(--border-color); border-radius: 8px;
             background-color: var(--bg-color); color: var(--text-color); font-family: inherit;
-            padding: 15px; box-sizing: border-box; resize: none; font-size: 1.05em; line-height: 1.6;
+            padding: 15px; resize: none; font-size: 1.05em; line-height: 1.6;
         }
         .memo-textarea:focus { outline: 2px solid var(--accent-color); }
 
         /* 중앙 메인 콘텐츠 영역 */
         .main-content {
-            flex-grow: 1; min-width: 0; display: flex; flex-direction: column;
+            flex-grow: 1; min-width: 0; display: flex; flex-direction: column; width: 100%;
         }
 
-        .header { text-align: center; margin-bottom: 20px; }
+        .header { text-align: center; margin-bottom: 20px; width: 100%; }
         #current-time { font-size: 0.9em; color: #888; }
         
         .card {
             background-color: var(--card-bg); border-radius: 12px; padding: 20px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; border: 1px solid var(--border-color);
+            width: 100%; /* 카드 너비가 부모를 넘지 않게 고정 */
         }
 
         /* 📊 대시보드 트랜스포머 레이아웃 */
-        .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; transition: all 0.3s; }
+        .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; transition: all 0.3s; width: 100%; }
         .stock-sidebar { width: 320px; flex-shrink: 0; display: flex; flex-direction: column; transition: width 0.3s; }
         .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
         
@@ -93,7 +100,7 @@
         .dashboard-layout.trend-mode .main-chart-area { display: none; } 
 
         /* 탭 버튼 스타일 */
-        .sidebar-tabs { display: flex; gap: 10px; margin-bottom: 15px; position: relative; z-index: 20; }
+        .sidebar-tabs { display: flex; gap: 10px; margin-bottom: 15px; position: relative; z-index: 20; width: 100%; }
         .tab-btn {
             flex: 1; padding: 15px 5px; border: 2px solid var(--border-color);
             background-color: var(--bg-color); color: var(--text-color);
@@ -102,19 +109,20 @@
         }
         .tab-btn.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
         
+        /* 핫리스트 위젯 전용 넉넉한 공간 */
         #stock-list-wrapper { width: 100%; }
         .trend-widget-container { height: 600px; width: 100%; border-radius: 8px; overflow: hidden; }
 
         .stock-list-container {
             max-height: 650px; overflow-y: auto; padding-right: 5px;
-            display: flex; flex-direction: column; gap: 10px;
+            display: flex; flex-direction: column; gap: 10px; width: 100%;
         }
         .stock-list-container::-webkit-scrollbar { width: 6px; height: 6px; }
         .stock-list-container::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; }
         
         .stock-item {
             position: relative; cursor: pointer; border: 3px solid transparent;
-            border-radius: 8px; transition: border-color 0.2s; background: var(--bg-color);
+            border-radius: 8px; transition: border-color 0.2s; background: var(--bg-color); width: 100%;
         }
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
@@ -126,12 +134,12 @@
         .news-list { list-style: none; padding: 0; margin: 0; min-height: 100px; }
         .news-list li { padding: 12px 0; border-bottom: 1px solid var(--border-color); }
         .news-list li:last-child { border-bottom: none; }
-        .news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; }
+        .news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; word-break: keep-all; overflow-wrap: break-word; display: block; }
         .loading-text { text-align: center; padding: 30px; color: #888; font-weight: bold; font-size: 1.1em; line-height: 1.5; }
 
         /* ⚔️ 하단 2단 뉴스 레이아웃 (글로벌 | 중동) */
         .news-split-layout { display: flex; gap: 20px; width: 100%; align-items: stretch; margin-bottom: 20px; }
-        .news-split-layout .card { flex: 1; margin-bottom: 0; display: flex; flex-direction: column; }
+        .news-split-layout .card { flex: 1; margin-bottom: 0; display: flex; flex-direction: column; width: 100%; }
         .load-more-btn { display: block; width: 100%; padding: 12px; margin-top: 15px; background: transparent; border: 2px solid var(--border-color); color: var(--text-color); font-weight: bold; border-radius: 8px; cursor: pointer; }
 
         /* 💰 PC버전 환율창 */
@@ -147,10 +155,10 @@
         }
         .floating-exchange.hidden { opacity: 0; pointer-events: none; transform: translateY(-10px); }
 
-        /* 📱 모바일 최적화 */
+        /* 📱 모바일 최적화 (가로 폭 완벽 통제) */
         @media (max-width: 1100px) {
-            .page-wrapper { flex-direction: column; }
-            .memo-sidebar { width: 100%; height: 300px; min-height: auto; position: relative; top: 0; z-index: 1; }
+            .page-wrapper { flex-direction: column; padding: 0 10px; } /* 모바일 여백 최소화 */
+            .memo-sidebar { width: 100%; height: 300px; min-height: auto; position: relative; top: 0; z-index: 1; margin-bottom: 5px; }
             .dashboard-layout { flex-direction: column; }
             .stock-sidebar { width: 100%; }
             .dashboard-layout.trend-mode .stock-sidebar { width: 100%; }
@@ -171,12 +179,12 @@
                 margin: 0 0 20px 0; align-items: stretch; z-index: 10; 
             }
             #toggle-exchange-btn { width: 100%; padding: 12px; font-size: 1.1em; }
-            .floating-exchange { width: 100%; box-sizing: border-box; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: none !important; }
+            .floating-exchange { width: 100%; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transform: none !important; }
             .floating-exchange.hidden { display: none !important; } 
         }
 
         /* 🎂 명언 & 생일 특별 영역 */
-        .quote-card { background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%); border: 1px solid #dce1e4; text-align: center; padding: 40px 20px; margin-top: 10px; }
+        .quote-card { background: linear-gradient(135deg, #f6f8f9 0%, #e5ebee 100%); border: 1px solid #dce1e4; text-align: center; padding: 40px 20px; margin-top: 10px; width: 100%; }
         body.dark-mode .quote-card { background: linear-gradient(135deg, #e0e5e8 0%, #f0f2f5 100%); border-color: #bbb; }
         body.dark-mode .quote-text { color: #000000 !important; } 
         body.dark-mode .quote-author { color: #333333 !important; } 
@@ -189,7 +197,7 @@
         .quote-author { font-size: 1.1em; color: #555; font-weight: bold; transition: 0.3s; }
 
         /* 💖 하트 버튼 컨테이너 */
-        .heart-btn-container { text-align: center; margin-top: 50px; margin-bottom: 80px; }
+        .heart-btn-container { text-align: center; margin-top: 50px; margin-bottom: 80px; width: 100%; }
         .heart-send-btn {
             display: inline-block; padding: 18px 40px; background-color: var(--heart-color); color: white; 
             font-weight: bold; font-size: 1.3em; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3); transition: all 0.3s ease;
@@ -304,7 +312,9 @@
                 <button class="heart-send-btn" id="heart-send-btn" onclick="sendHeartToDaughter()">💖 예쁜 딸에게 하트 보내기</button>
             </div>
         </div>
-    </div> <div class="floating-controls">
+    </div> 
+
+    <div class="floating-controls">
         <button class="action-btn" id="theme-btn" onclick="toggleTheme()">🌙</button>
         <button class="action-btn" id="refresh-btn" onclick="refreshAll()">🔄</button>
     </div>
@@ -341,7 +351,7 @@
             memoPad.value = memoPad.value + (memoPad.value.endsWith('\n') ? '' : '\n') + stamp;
             localStorage.setItem('daddy_daily_memo', memoPad.value);
             memoPad.focus();
-            memoPad.scrollTop = memoPad.scrollHeight; // 맨 아래로 스크롤
+            memoPad.scrollTop = memoPad.scrollHeight; 
         }
 
         function switchTab(tabName) {
@@ -498,7 +508,7 @@
                 if(!articles || articles.length === 0) { listEl.innerHTML = '<li>관련 뉴스가 없습니다.</li>'; return; }
                 
                 listEl.innerHTML = '';
-                articles.slice(0, 6).forEach(article => { // 상위 6개 노출
+                articles.slice(0, 6).forEach(article => { 
                     const li = document.createElement('li'); 
                     li.innerHTML = `<a href="${article.link}" target="_blank" style="color:var(--accent-color);">🔥 ${article.title} <span style="font-size:0.8em; color:#888; margin-left:10px;">(${formatKoreanTime(article.pubDate)})</span></a>`;
                     listEl.appendChild(li);
@@ -532,7 +542,7 @@
         
         function refreshAll() { 
             fetchRealTimeNews(null, 'global-news-list', null); 
-            fetchMiddleEastNews(); // 새로고침 시 중동 뉴스도 갱신
+            fetchMiddleEastNews(); 
             if(currentTab === 'it') { fetchRealTimeNews(currentActiveStock.keyword, 'company-news-list', 5); setupStockList(itStocks); renderChart(currentActiveStock.symbol); } 
             else { switchTab('trend'); } 
             renderExchangeWidget(); 
@@ -545,7 +555,7 @@
             btn.innerText = "✨ 하트 전송 완료!";
             btn.disabled = true;
 
-            // 저장된 값이 없으면 7로 시작해서 다음 번 클릭 시 무조건 '8번째'가 되도록 세팅!
+            // 저장된 값이 없으면 기본값을 7로 잡아서, 이번 클릭이 무조건 8번째가 되도록 설정!
             let realHeartCount = parseInt(localStorage.getItem('daddy_real_heart_count') || '7');
             realHeartCount++; // 8로 올라감
             localStorage.setItem('daddy_real_heart_count', realHeartCount);
@@ -573,8 +583,16 @@
             setTimeout(() => { overlay.style.display = 'none'; }, 5000);
         }
 
-        const lunarBirthdayToSolar = { 2026:"03-16",2027:"03-05",2028:"02-22",2029:"03-12",2030:"03-02",2031:"02-19",2032:"03-09",2033:"02-27",2034:"03-18",2035:"03-07",2036:"02-24",2037:"03-14",2038:"03-03",2039:"02-20",2040:"03-10",2041:"02-28",2042:"02-18",2043:"03-09",2044:"02-26",2045:"03-16",2046:"03-05",2047:"02-22",2048:"03-12",2049:"03-01",2050:"02-19",2051:"03-10",2052:"02-28",2053:"03-18",2054:"03-07",2055:"02-24",2056:"03-13" };
+        function startHeartAnimation() {
+            const container = document.getElementById('heart-container'); container.style.display = 'block'; 
+            setInterval(() => {
+                const heart = document.createElement('div'); heart.classList.add('floating-heart'); heart.innerText = '♥'; 
+                heart.style.left = Math.random() * 100 + 'vw'; heart.style.animationDuration = Math.random() * 3 + 4 + 's'; heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
+                container.appendChild(heart); setTimeout(() => { heart.remove(); }, 7000); 
+            }, 400); 
+        }
 
+        const lunarBirthdayToSolar = { 2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02", 2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07", 2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10", 2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16", 2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19", 2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" };
         const fatherQuotes = [
             { text: "나이를 먹는다는 것은 등산을 하는 것과 같다. 오를수록 숨은 차지만, 시야는 점점 넓어진다.", author: "잉그마르 베르히만" }, { text: "청춘은 나이가 아니라 마음의 상태에 있다. 당신의 가장 눈부신 시절은 아직 오지 않았다.", author: "사무엘 울만" }, { text: "은퇴는 마침표가 아니라, 당신이 진정 원했던 삶을 향해 긋는 새로운 밑줄입니다.", author: "리처드 라이더" }, { text: "무언가를 시작하기에 너무 늦은 나이란 결코 없다. 오늘이 당신의 남은 인생 중 가장 젊은 날이다.", author: "C.S. 루이스" }, { text: "인생의 전반전이 성공을 쫓는 시간이었다면, 후반전은 의미를 찾아가는 아름다운 여정이다.", author: "칼 융" }, { text: "가장 훌륭한 일은 아직 시작되지 않았다. 최고의 날들은 아직 살아보지 않은 날들이다.", author: "토마스 머튼" }, { text: "나무는 겨울에 자라지 않는 것처럼 보이지만, 사실은 다가올 봄을 위해 가장 깊고 단단한 뿌리를 내리고 있습니다.", author: "작자 미상" }, { text: "성공이란 늙어가는 것을 두려워하지 않고, 매 순간을 자신의 속도에 맞춰 당당하게 걸어가는 것이다.", author: "알베르 카뮈" }, { text: "당신이 지금까지 살아온 모든 순간이, 앞으로 살아갈 날들을 위한 가장 완벽한 준비 운동이었습니다.", author: "작자 미상" }, { text: "인생의 2막은 지금까지 쌓아온 지혜와 여유를 마음껏 펼칠 수 있는 진정한 황금기입니다.", author: "작자 미상" }, { text: "아름다운 노후는 그동안 흘린 땀방울이 만들어낸 가장 값진 훈장입니다.", author: "작자 미상" }, { text: "당신의 50대는 지난 세월의 지혜와 다가올 시간의 여유가 만나는 아름다운 교차로입니다.", author: "작자 미상" }, { text: "진정한 여행은 새로운 풍경을 보는 것이 아니라, 새로운 눈을 가지는 데 있다.", author: "마르셀 프루스트" }, { text: "행복은 산꼭대기에 있는 것이 아니라, 산을 오르는 과정 곳곳에 피어 있습니다.", author: "작자 미상" }, { text: "가장 깊은 밤에 가장 빛나는 별이 뜹니다. 아버지의 인생 2막은 그 어느 때보다 빛날 것입니다.", author: "작자 미상" }, { text: "나이는 숫자에 불과하다. 중요한 것은 당신이 품고 있는 꿈과 열정의 크기이다.", author: "작자 미상" }, { text: "때로는 속도를 늦추고 주변의 풍경을 감상하는 것이, 더 멀리 가는 가장 좋은 방법입니다.", author: "작자 미상" }, { text: "가장 위대한 유산은 재물이 아니라, 아버지가 보여주신 묵묵한 성실함과 따뜻한 사랑입니다.", author: "작자 미상" }, { text: "지금까지는 가족을 위해 달렸다면, 이제는 온전히 아버지만을 위한 왈츠를 추실 시간입니다.", author: "작자 미상" }, { text: "오랜 세월 비바람을 견뎌낸 거목만이 가장 시원한 그늘을 만들어 줍니다. 감사합니다.", author: "작자 미상" }, { text: "새로운 시작을 두려워하지 마세요. 당신의 경험이라는 나침반이 가장 정확한 길을 안내할 것입니다.", author: "작자 미상" }, { text: "인생은 속도가 아니라 방향입니다. 이제는 마음이 이끄는 방향으로 걸어가세요.", author: "괴테" }, { text: "수십 년의 성실함으로 지어 올린 당신의 인생은 그 어떤 빌딩보다 견고하고 아름답습니다.", author: "작자 미상" }, { text: "은퇴는 직업에서 물러나는 가장 빛나는 첫걸음입니다.", author: "작자 미상" }, { text: "매일 아침 눈을 뜨는 것이 기대되는 삶, 그것이 당신이 맞이할 인생의 두 번째 봄입니다.", author: "작자 미상" }, { text: "과거를 자랑스러워하고, 현재를 즐기며, 미래를 기대하십시오. 당신은 충분히 그럴 자격이 있습니다.", author: "작자 미상" }, { text: "인생의 해질녘이 일출보다 아름다운 이유는, 하루 종일 품었던 따뜻한 온기를 머금고 있기 때문입니다.", author: "작자 미상" }, { text: "어떤 길을 가더라도 당신의 발걸음에는 지혜가 묻어날 것입니다. 자신을 믿고 나아가세요.", author: "작자 미상" }, { text: "가장 평범한 일상이 가장 위대한 행복임을 아는 나이, 지금이 바로 당신의 황금기입니다.", author: "작자 미상" }, { text: "수많은 위기를 묵묵히 이겨낸 당신의 굳은살 배인 손을 존경합니다. 이제는 여유를 쥐어보세요.", author: "작자 미상" }, { text: "당신의 존재 자체가 우리 가족의 가장 큰 축복이자 자랑입니다. 앞으로의 매일이 축제이길 바랍니다.", author: "가족 일동" }
         ];
@@ -592,15 +610,6 @@
             quoteCard.classList.remove('birthday-mode'); textEl.style.fontWeight = "normal"; textEl.style.fontSize = "1.3em"; textEl.innerText = `"${selectedQuote.text}"`; authorEl.innerText = `- ${selectedQuote.author} -`;
         }
 
-        function startHeartAnimation() {
-            const container = document.getElementById('heart-container'); container.style.display = 'block'; 
-            setInterval(() => {
-                const heart = document.createElement('div'); heart.classList.add('floating-heart'); heart.innerText = '♥'; 
-                heart.style.left = Math.random() * 100 + 'vw'; heart.style.animationDuration = Math.random() * 3 + 4 + 's'; heart.style.fontSize = Math.random() * 1.5 + 1 + 'rem';
-                container.appendChild(heart); setTimeout(() => { heart.remove(); }, 7000); 
-            }, 400); 
-        }
-
         document.getElementById('toggle-exchange-btn').addEventListener('click', () => {
             isExchangeVisible = !isExchangeVisible; document.getElementById('exchange-container').classList.toggle('hidden'); document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 환율창 숨기기" : "💱 환율창 열기";
         });
@@ -613,7 +622,7 @@
             setTimeout(() => {
                 renderExchangeWidget();
                 fetchRealTimeNews(null, 'global-news-list', null);
-                fetchMiddleEastNews(); // 중동 뉴스 호출 시작
+                fetchMiddleEastNews(); // 중동 뉴스 스캔 시작
             }, 100);
 
             setTimeout(() => {
