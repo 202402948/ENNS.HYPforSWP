@@ -80,12 +80,16 @@
         /* ⚔️ 상단 3단 뉴스 레이아웃 */
         .news-split-layout { display: flex; gap: 20px; width: 100%; align-items: stretch; margin-bottom: 20px; }
         .news-split-layout .card { flex: 1; margin-bottom: 0; display: flex; flex-direction: column; width: 100%; }
-        .load-more-btn { display: block; width: 100%; padding: 12px; margin-top: 15px; background: transparent; border: 2px solid var(--border-color); color: var(--text-color); font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
+        
+        /* 🌟 더보기 버튼 위치 통일: 카드 밑바닥에 고정되도록 margin-top: auto 적용 🌟 */
+        .load-more-btn { display: block; width: 100%; padding: 12px; margin-top: auto; background: transparent; border: 2px solid var(--border-color); color: var(--text-color); font-weight: bold; border-radius: 8px; cursor: pointer; transition: 0.2s; }
         .load-more-btn:hover { background-color: var(--btn-hover-bg); }
 
         /* 뉴스 공통 스타일 */
         .news-header { margin-top: 0; margin-bottom: 15px; }
-        .news-list { list-style: none; padding: 0; margin: 0; min-height: 100px; }
+        
+        /* 🌟 뉴스 리스트가 빈 공간을 채우도록 flex-grow: 1 적용 🌟 */
+        .news-list { list-style: none; padding: 0; margin: 0; min-height: 100px; flex-grow: 1; }
         .news-list li { padding: 12px 0; border-bottom: 1px solid var(--border-color); }
         .news-list li:last-child { border-bottom: none; }
         .news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; word-break: keep-all; overflow-wrap: break-word; display: block; }
@@ -445,7 +449,6 @@
             return `${month}/${date} ${hours}:${minutes}`;
         }
 
-        // 뉴스 가져오기 공통 함수
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
             if(listElementId === 'company-news-list') document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
@@ -461,7 +464,7 @@
                 
                 if(listElementId === 'global-news-list') {
                     allGlobalNews = articles; 
-                    isGlobalExpanded = false; // 초기화
+                    isGlobalExpanded = false; 
                     renderGlobalNewsList();
                     document.getElementById('ticker-text').innerHTML = `<span>${articles.slice(0, 10).map(a => `[속보] ${a.title}`).join(' <span> &nbsp; | &nbsp; </span> ')}</span>`;
                 } else {
@@ -497,7 +500,6 @@
             renderGlobalNewsList();
         }
 
-        // 🌟 중동 전용 뉴스 (더보기 기능 포함) 🌟
         function fetchMiddleEastNews() {
             const listEl = document.getElementById('middle-east-news-list');
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">중동 뉴스를 스캔 중입니다...</div></li>';
@@ -539,7 +541,6 @@
             renderMiddleNewsList();
         }
 
-        // 반도체 전용 뉴스 스캔 함수
         function fetchSemiconductorNews() {
             const listEl = document.getElementById('semi-news-list');
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">반도체 뉴스를 스캔 중입니다...</div></li>';
@@ -586,7 +587,6 @@
             container.innerHTML = ''; 
             const themeStr = isDarkMode ? "dark" : "light";
 
-            // 1. 환율 위젯
             const exTitle = document.createElement('h4');
             exTitle.style.margin = "0 0 10px 0"; exTitle.innerText = "💱 실시간 환율";
             container.appendChild(exTitle);
@@ -594,7 +594,6 @@
             exScript.innerHTML = JSON.stringify({ "symbol": "FX_IDC:USDKRW", "width": "100%", "isTransparent": true, "colorTheme": themeStr, "locale": "kr" });
             container.appendChild(exScript);
 
-            // 2. 비트코인 위젯
             const btcTitle = document.createElement('h4');
             btcTitle.style.margin = "15px 0 10px 0"; btcTitle.innerText = "🪙 비트코인 시세";
             container.appendChild(btcTitle);
@@ -602,7 +601,6 @@
             btcScript.innerHTML = JSON.stringify({ "symbol": "BINANCE:BTCUSDT", "width": "100%", "isTransparent": true, "colorTheme": themeStr, "locale": "kr" });
             container.appendChild(btcScript);
 
-            // 3. 반도체 메모리 바로가기 패널
             const memDiv = document.createElement('div');
             memDiv.style.marginTop = "15px"; memDiv.style.fontSize = "0.95em";
             memDiv.innerHTML = `
@@ -677,39 +675,38 @@
 
         const lunarBirthdayToSolar = { 2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02", 2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07", 2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10", 2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16", 2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19", 2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" };
         
-        // 🌟 투자 거장 명언 31선 (5일은 기존 명언 유지) 🌟
         const fatherQuotes = [
-            { text: "10년 동안 보유할 주식이 아니라면 단 10분도 보유하지 마라.", author: "워런 버핏" },
+            { text: "10년 동안 보유할 주식이 아니라면 단 10분도 보유하지 마라.", author: "워렌 버핏" },
             { text: "주식 시장에서 가장 중요한 기관은 위장이 아니라 배짱이다.", author: "피터 린치" },
             { text: "투자는 철저한 분석을 통해 원금을 안전하게 지키면서도 만족스러운 수익을 확보하는 것이다.", author: "벤저민 그레이엄" },
             { text: "대중을 따라가는 것은 평균으로 후퇴하겠다는 의미다.", author: "찰리 멍거" },
             { text: "인생의 전반전이 성공을 쫓는 시간이었다면, 후반전은 의미를 찾아가는 아름다운 여정이다.", author: "칼 융" },
             { text: "강세장은 비관 속에서 태어나, 회의 속에서 자라며, 낙관 속에서 성숙하고, 행복감 속에서 죽는다.", author: "존 템플턴" },
-            { text: "남들이 탐욕을 부릴 때 두려워하고, 남들이 두려워할 때 탐욕을 부려라.", author: "워런 버핏" },
+            { text: "남들이 탐욕을 부릴 때 두려워하고, 남들이 두려워할 때 탐욕을 부려라.", author: "워렌 버핏" },
             { text: "주식 투자는 부와 파산 사이를 오가는 위험한 항해다.", author: "앙드레 코스톨라니" },
-            { text: "주식시장은 조급한 사람의 돈이 인내심 있는 사람에게로 이동하는 기구다.", author: "워런 버핏" },
+            { text: "주식시장은 조급한 사람의 돈이 인내심 있는 사람에게로 이동하는 기구다.", author: "워렌 버핏" },
             { text: "월스트리트에서 새로운 것은 아무것도 없다. 인간의 본성이 변하지 않기 때문이다.", author: "제시 리버모어" },
             { text: "직장이나 동네 쇼핑몰에서 월스트리트 전문가들보다 앞서 굉장한 종목들을 골라낼 수 있다.", author: "피터 린치" },
             { text: "미스터 마켓은 당신의 주인이 아니라 당신의 하인이 되어야 한다.", author: "벤저민 그레이엄" },
             { text: "모두가 어떤 자산에 우호적일 때, 그 자산은 비싸고 매력 없는 것이 된다.", author: "하워드 막스" },
             { text: "최고의 투자 시기는 피가 낭자할 때다. 설령 그것이 당신의 피일지라도.", author: "존 템플턴" },
-            { text: "잠자는 동안에도 돈이 들어오는 방법을 찾아내지 못한다면 죽을 때까지 일을 해야만 할 것이다.", author: "워런 버핏" },
+            { text: "잠자는 동안에도 돈이 들어오는 방법을 찾아내지 못한다면 죽을 때까지 일을 해야만 할 것이다.", author: "워렌 버핏" },
             { text: "시장은 항상 틀린다.", author: "조지 소로스" },
             { text: "뛰어난 투자자는 위험을 피하는 것이 아니라 위험을 관리한다.", author: "레이 달리오" },
-            { text: "위험은 자신이 무엇을 하는지 모르는 데서 온다.", author: "워런 버핏" },
+            { text: "위험은 자신이 무엇을 하는지 모르는 데서 온다.", author: "워렌 버핏" },
             { text: "가치투자는 철저하게 위험을 회피하는 철학이다.", author: "세스 클라만" },
             { text: "하락장에서 불안한 이유는 공부도 안 하고 전 재산을 몰빵했기 때문이다.", author: "피터 린치" },
             { text: "돈을 뜨겁게 사랑하되 차갑게 다루어라.", author: "앙드레 코스톨라니" },
             { text: "강세장에서 최대의 도박을 한 사람이 약세장에서 최대의 손실을 본다.", author: "벤저민 그레이엄" },
-            { text: "썰물이 빠졌을 때 비로소 누가 발가벗고 헤엄쳤는지 알 수 있다.", author: "워런 버핏" },
+            { text: "썰물이 빠졌을 때 비로소 누가 발가벗고 헤엄쳤는지 알 수 있다.", author: "워렌 버핏" },
             { text: "기업의 수익이 하락하면 주가도 하락한다. 이보다 더 확실한 법칙은 없다.", author: "피터 린치" },
             { text: "시장이 비이성적인 상태를 유지하는 기간이 당신이 지불 능력을 유지하는 기간보다 길 수 있다.", author: "존 메이너드 케인스" },
-            { text: "가격은 우리가 내는 돈이며, 가치는 우리가 얻는 것이다.", author: "워런 버핏" },
+            { text: "가격은 우리가 내는 돈이며, 가치는 우리가 얻는 것이다.", author: "워렌 버핏" },
             { text: "성공적인 투자는 지루해야 한다.", author: "조지 소로스" },
             { text: "손실이 날 때는 베팅 규모를 줄이고, 수익이 날 때는 베팅 규모를 늘려라.", author: "폴 튜더 존스" },
             { text: "자신이 어떤 주식을 왜 가지고 있는지 아이에게 2분 안에 설명할 수 없다면 보유하지 마라.", author: "피터 린치" },
             { text: "주식 시장에서 가장 위험한 네 단어는 '이번에는 다르다'이다.", author: "존 템플턴" },
-            { text: "첫 번째 원칙, 절대 돈을 잃지 마라. 두 번째 원칙, 첫 번째 원칙을 절대 잊지 마라.", author: "워런 버핏" }
+            { text: "첫 번째 원칙, 절대 돈을 잃지 마라. 두 번째 원칙, 첫 번째 원칙을 절대 잊지 마라.", author: "워렌 버핏" }
         ];
 
         function displayDailyQuote() {
