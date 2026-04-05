@@ -124,7 +124,7 @@
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
-        /* 🌟 [수정완료] 차트 가로 60%, 세로 260px로 조정 (가로가 더 긴 와이드 비율) 🌟 */
+        /* 🌟 PC버전 눈치 방지용 미니 차트 🌟 */
         #chart-container { height: 260px; width: 60%; margin-bottom: 20px; transition: 0.3s; }
         
         .company-news-area { flex-grow: 0; margin-bottom: 20px; }
@@ -155,7 +155,6 @@
             .stock-list-container { flex-direction: row; overflow-x: auto; max-height: none; padding-bottom: 15px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
             .stock-item { min-width: 200px; flex-shrink: 0; scroll-snap-align: start; }
             
-            /* 모바일에서는 보기 편하도록 꽉 차게 */
             #chart-container { height: 280px; width: 100%; }
             .trend-widget-container { height: 500px; }
 
@@ -312,7 +311,7 @@
 
     <script>
         let isDarkMode = false;
-        let isExchangeVisible = true;
+        let isExchangeVisible = true; // 아래 초기화 로직에서 재설정됨
         let currentTab = 'it';
         let currentActiveStock = null;
         
@@ -383,12 +382,11 @@
             }, 50); 
         }
 
-        // 🌟 SNDK(샌디스크) 티커 반영 완료 🌟
         const itStocks = [
             { symbol: 'NASDAQ:NVDA', name: '엔비디아', keyword: '엔비디아' },
             { symbol: 'NASDAQ:PLTR', name: '팔란티어', keyword: '팔란티어' }, 
             { symbol: 'NASDAQ:MU', name: '마이크론', keyword: '마이크론' }, 
-            { symbol: 'NASDAQ:SNDK', name: '샌디스크', keyword: '샌디스크' }, 
+            { symbol: 'NASDAQ:SNDK', name: 'SanDisk', keyword: '샌디스크' }, 
             { symbol: 'NASDAQ:NBIS', name: '네비우스 그룹', keyword: '네비우스' }, 
             { symbol: 'NYSE:JOBY', name: '조비에이션', keyword: '조비에이션' }, 
             { symbol: 'NASDAQ:CRDO', name: '크리도 테크놀로지', keyword: '크리도 테크놀로지' }, 
@@ -459,7 +457,6 @@
             if(listElementId === 'company-news-list') document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">뉴스를 가져오는 중입니다...</div></li>';
             
-            // 일반적인 경제/종목 검색어로 복구하여 뉴스 안 뜨는 오류 해결!
             let queryStr = keyword ? (keyword + " 주식 OR 경제") : ('경제 OR 증시 OR 금융');
             let rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(queryStr)}&hl=ko&gl=KR&ceid=KR:ko`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`; 
@@ -467,7 +464,7 @@
             fetch(apiUrl).then(res => res.json()).then(data => {
                 if(data.status !== "ok") throw new Error("API 오류");
                 const articles = data.items;
-                if(!articles || articles.length === 0) { listEl.innerHTML = '<li>관련 뉴스가 없습니다.</li>'; return; }
+                if(!articles || articles.length === 0) { listEl.innerHTML = '<li>관련 최신 뉴스가 없습니다.</li>'; return; }
                 
                 if(listElementId === 'global-news-list') {
                     allGlobalNews = articles; 
@@ -624,7 +621,9 @@
         }
 
         document.getElementById('toggle-exchange-btn').addEventListener('click', () => {
-            isExchangeVisible = !isExchangeVisible; document.getElementById('exchange-container').classList.toggle('hidden'); document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 종합 시세창 숨기기" : "💱 종합 시세창 열기";
+            isExchangeVisible = !isExchangeVisible; 
+            document.getElementById('exchange-container').classList.toggle('hidden'); 
+            document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 종합 시세창 숨기기" : "💱 종합 시세창 열기";
         });
 
         function sendHeartToDaughter() {
@@ -718,10 +717,22 @@
             quoteCard.classList.remove('birthday-mode'); textEl.style.fontWeight = "normal"; textEl.style.fontSize = "1.3em"; textEl.innerText = `"${selectedQuote.text}"`; authorEl.innerText = `- ${selectedQuote.author} -`;
         }
 
+        // 🌟 [추가/수정] PC에서 접속 시 기본적으로 환율창을 숨김 처리 (모바일은 유지) 🌟
         document.addEventListener("DOMContentLoaded", () => {
             updateTime();
             setInterval(updateTime, 1000);
             displayDailyQuote(); 
+            
+            // 화면 가로가 1100px 보다 크면 (PC 화면이면) 시세창을 닫아둡니다.
+            if (window.innerWidth > 1100) {
+                isExchangeVisible = false;
+                document.getElementById('exchange-container').classList.add('hidden');
+                document.getElementById('toggle-exchange-btn').innerText = "💱 종합 시세창 열기";
+            } else {
+                isExchangeVisible = true;
+                document.getElementById('exchange-container').classList.remove('hidden');
+                document.getElementById('toggle-exchange-btn').innerText = "💱 종합 시세창 숨기기";
+            }
             
             setTimeout(() => {
                 renderExchangeWidget();
