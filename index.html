@@ -124,8 +124,8 @@
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
-        /* 🌟 PC버전: 눈치 안 보이는 미니 차트 */
-        #chart-container { height: 220px; width: 100%; margin-bottom: 20px; transition: 0.3s; }
+        /* 🌟 [수정완료] PC버전: 세로 길이는 500px 유지, 가로 폭만 절반(50%)으로 축소 🌟 */
+        #chart-container { height: 500px; width: 50%; margin-bottom: 20px; transition: 0.3s; }
         .company-news-area { padding-top: 15px; border-top: 2px dashed var(--border-color); flex-grow: 1; }
         .loading-text { text-align: center; padding: 30px; color: #888; font-weight: bold; font-size: 1.1em; line-height: 1.5; }
 
@@ -153,7 +153,8 @@
             .stock-list-container { flex-direction: row; overflow-x: auto; max-height: none; padding-bottom: 15px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
             .stock-item { min-width: 280px; flex-shrink: 0; scroll-snap-align: start; }
             
-            #chart-container { height: 280px; }
+            /* 🌟 모바일에서는 꽉 차게 100%로 설정 */
+            #chart-container { height: 280px; width: 100%; }
             .trend-widget-container { height: 500px; }
 
             .exchange-wrapper { position: relative !important; top: auto !important; right: auto !important; width: 100%; margin: 0 0 20px 0; align-items: stretch; z-index: 10; }
@@ -445,12 +446,14 @@
             return `${month}/${date} ${hours}:${minutes}`;
         }
 
+        // 🌟 [핵심] 모든 뉴스 API 요청 시 when:3d (최근 3일 필터)를 강제 추가하여 안전하게 검색! 🌟
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
-            if(listElementId === 'company-news-list') document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
+            if(listElementId === 'company-news-list') document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 3일 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">뉴스를 가져오는 중입니다...</div></li>';
             
-            let queryStr = keyword ? (keyword + " 주식 OR 경제 when:3d") : ('경제 OR 증시 OR 금융 when:3d');
+            // 키워드가 있으면 해당 키워드에 대해서만 3일 검색, 없으면 일반 경제 뉴스 3일 검색
+            let queryStr = keyword ? (`${keyword} when:3d`) : ('경제 OR 증시 OR 금융 when:3d');
             let rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(queryStr)}&hl=ko&gl=KR&ceid=KR:ko`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`; 
 
@@ -498,6 +501,7 @@
             const listEl = document.getElementById('middle-east-news-list');
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">중동 뉴스를 스캔 중입니다...</div></li>';
             
+            // 최근 3일 필터 적용 (when:3d)
             const keyword = "중동 OR 이스라엘 OR 하마스 OR 이란 OR 후티 OR 레바논 when:3d";
             const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ko&gl=KR&ceid=KR:ko`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -536,6 +540,7 @@
             const listEl = document.getElementById('semi-news-list');
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">반도체 뉴스를 스캔 중입니다...</div></li>';
             
+            // 최근 3일 필터 적용 (when:3d)
             const keyword = "글로벌 반도체 소재 OR 반도체 장비 OR 반도체 공급망 OR TSMC OR ASML -AI -인공지능 when:3d";
             const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(keyword)}&hl=ko&gl=KR&ceid=KR:ko`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -570,7 +575,6 @@
 
         function toggleSemiNews() { isSemiExpanded = !isSemiExpanded; renderSemiNewsList(); }
 
-        // 🌟 종합 시세창 렌더링 (DDR5, NAND만 유지!) 🌟
         function renderExchangeWidget() {
             const container = document.getElementById('exchange-container');
             container.innerHTML = ''; 
@@ -662,18 +666,19 @@
 
         const lunarBirthdayToSolar = { 2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02", 2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07", 2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10", 2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16", 2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19", 2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" };
         
+        // 🌟 아빠 힘내세요! 세계 위인들의 희망/동기부여 명언 31선 🌟
         const fatherQuotes = [
             { text: "당신이 할 수 있다고 믿든, 할 수 없다고 믿든, 믿는 대로 될 것이다.", author: "헨리 포드" },
             { text: "성공의 비결은 단 한 가지, 잘할 수 있는 일에 광적으로 집중하는 것이다.", author: "톰 모나한" },
             { text: "가장 어두운 밤도 언젠가는 끝나고 해가 떠오른다.", author: "빈센트 반 고흐" },
             { text: "우리가 이룬 가장 큰 영광은 한 번도 실패하지 않은 것이 아니라, 넘어질 때마다 다시 일어나는 것이다.", author: "공자" },
-            { text: "인생의 전반전이 성공을 쫓는 시간이었다면, 후반전은 의미를 찾아가는 아름다운 여정이다.", author: "칼 융" },
+            { text: "인생의 전반전이 성공을 쫓는 시간이었다면, 후반전은 의미를 찾아가는 아름다운 여정이다.", author: "칼 융" }, // 5일 유지
             { text: "인생에서 실패한 사람 중 다수는 성공을 목전에 두고도 모른 채 포기한 이들이다.", author: "토머스 에디슨" },
             { text: "겨울이 오면 봄이 멀지 않으리.", author: "퍼시 비시 셸리" },
             { text: "바람이 불지 않을 때 바람개비를 돌리는 방법은, 앞으로 달려나가는 것뿐이다.", author: "데일 카네기" },
             { text: "작은 기회로부터 종종 위대한 업적이 시작된다.", author: "데모스테네스" },
-            { text: "우리는 길목에 서 있었다.", author: "최태원" },
-            { text: "거대한 떡갈나무도 작은 도토리에서부터 시작되었다.", author: "영어 속담" },
+            { text: "우리는 길목에 서 있었다.", author: "최태원" }, // 🌟 최태원 회장 명언 수정 완료 🌟
+            { text: "위대한 떡갈나무도 작은 도토리에서부터 시작되었다.", author: "속담" },
             { text: "길이 없으면 길을 찾아라. 찾아도 없으면 길을 만들어라.", author: "정주영 회장" },
             { text: "비관론자는 모든 기회에서 어려움을 찾아내고, 낙관론자는 모든 어려움에서 기회를 찾아낸다.", author: "윈스턴 처칠" },
             { text: "나만이 내 인생을 바꿀 수 있다. 아무도 날 대신해 해줄 수 없다.", author: "캐럴 버넷" },
