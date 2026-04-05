@@ -90,10 +90,8 @@
         .news-list li:last-child { border-bottom: none; }
         .news-list a { text-decoration: none; color: var(--text-color); font-size: 1.05em; font-weight: bold; word-break: keep-all; overflow-wrap: break-word; display: block; }
         
-        /* 📊 대시보드 트랜스포머 레이아웃 */
+        /* 📊 대시보드 트랜스포머 레이아웃 (차트 영역) */
         .dashboard-layout { display: flex; gap: 20px; align-items: flex-start; transition: all 0.3s; width: 100%; }
-        
-        /* 🌟 [수정] 종목 선택창 크기 다이어트! (320px -> 240px) 🌟 */
         .stock-sidebar { width: 240px; flex-shrink: 0; display: flex; flex-direction: column; transition: width 0.3s; }
         .main-chart-area { flex-grow: 1; min-width: 0; display: flex; flex-direction: column; }
         
@@ -126,16 +124,14 @@
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
-        /* 🌟 [수정] 회사 눈치 방지용 차트: 세로 500px 유지, 가로 폭 50% 🌟 */
-        #chart-container { height: 500px; width: 50%; margin-bottom: 20px; transition: 0.3s; }
+        /* 🌟 [수정완료] 차트 가로 60%, 세로 260px로 조정 (가로가 더 긴 와이드 비율) 🌟 */
+        #chart-container { height: 260px; width: 60%; margin-bottom: 20px; transition: 0.3s; }
         
-        /* 🌟 [수정] 뉴스가 위로, 차트가 아래로 배치됨에 따른 여백 수정 🌟 */
         .company-news-area { flex-grow: 0; margin-bottom: 20px; }
         .chart-section { padding-top: 20px; border-top: 2px dashed var(--border-color); }
-
         .loading-text { text-align: center; padding: 30px; color: #888; font-weight: bold; font-size: 1.1em; line-height: 1.5; }
 
-        /* 💰 PC버전 시세창 (환율+비트코인+반도체) */
+        /* 💰 PC버전 시세창 */
         .exchange-wrapper { position: fixed; right: 20px; top: 80px; z-index: 1000; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
         #toggle-exchange-btn { 
             background-color: var(--card-bg); color: var(--text-color); 
@@ -159,7 +155,7 @@
             .stock-list-container { flex-direction: row; overflow-x: auto; max-height: none; padding-bottom: 15px; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
             .stock-item { min-width: 200px; flex-shrink: 0; scroll-snap-align: start; }
             
-            /* 모바일에서는 차트가 꽉 차게 100%로 설정 */
+            /* 모바일에서는 보기 편하도록 꽉 차게 */
             #chart-container { height: 280px; width: 100%; }
             .trend-widget-container { height: 500px; }
 
@@ -380,20 +376,19 @@
                     wrapper.appendChild(widgetDiv);
 
                     document.getElementById('chart-main-title').innerText = `📊 미국 증시 실시간 핫리스트`;
-                    document.getElementById('chart-container').innerHTML = '<div class="loading-text" style="padding-top: 100px;">안내: 실시간 주도주 탭에서는 개별 차트 대신<br>위쪽의 랭킹 보드에 집중해 주세요!</div>';
+                    document.getElementById('chart-container').innerHTML = '<div class="loading-text" style="padding-top: 80px;">안내: 실시간 주도주 탭에서는 개별 차트 대신<br>위쪽의 랭킹 보드에 집중해 주세요!</div>';
                     
-                    // 주도주 탭일 때는 미국 증시 뉴스 호출
                     fetchRealTimeNews("미국 증시", 'company-news-list', 5);
                 }
             }, 50); 
         }
 
-        // 🌟 새로운 종목 및 샌디스크, 나미타스 완벽 반영 🌟
+        // 🌟 SNDK(샌디스크) 티커 반영 완료 🌟
         const itStocks = [
             { symbol: 'NASDAQ:NVDA', name: '엔비디아', keyword: '엔비디아' },
             { symbol: 'NASDAQ:PLTR', name: '팔란티어', keyword: '팔란티어' }, 
             { symbol: 'NASDAQ:MU', name: '마이크론', keyword: '마이크론' }, 
-            { symbol: 'NASDAQ:WDC', name: 'SanDisk', keyword: '샌디스크' }, 
+            { symbol: 'NASDAQ:SNDK', name: 'SanDisk', keyword: '샌디스크' }, 
             { symbol: 'NASDAQ:NBIS', name: '네비우스 그룹', keyword: '네비우스' }, 
             { symbol: 'NYSE:JOBY', name: '조비에이션', keyword: '조비에이션' }, 
             { symbol: 'NASDAQ:CRDO', name: '크리도 테크놀로지', keyword: '크리도 테크놀로지' }, 
@@ -458,13 +453,13 @@
             return `${month}/${date} ${hours}:${minutes}`;
         }
 
-        // 🌟 뉴스 API 원래대로 안전하게 복구 완료! 🌟
         function fetchRealTimeNews(keyword, listElementId, displayCount) {
             const listEl = document.getElementById(listElementId);
             
             if(listElementId === 'company-news-list') document.getElementById('company-news-title').innerText = keyword ? `📰 ${keyword} 최근 관련 뉴스` : `📰 글로벌 경제 주요 뉴스`;
             listEl.innerHTML = '<li><div class="loading-text" style="padding: 10px;">뉴스를 가져오는 중입니다...</div></li>';
             
+            // 일반적인 경제/종목 검색어로 복구하여 뉴스 안 뜨는 오류 해결!
             let queryStr = keyword ? (keyword + " 주식 OR 경제") : ('경제 OR 증시 OR 금융');
             let rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(queryStr)}&hl=ko&gl=KR&ceid=KR:ko`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`; 
@@ -585,7 +580,6 @@
 
         function toggleSemiNews() { isSemiExpanded = !isSemiExpanded; renderSemiNewsList(); }
 
-        // 🌟 종합 시세창 렌더링 (DDR5, NAND만 유지!) 🌟
         function renderExchangeWidget() {
             const container = document.getElementById('exchange-container');
             container.innerHTML = ''; 
@@ -677,7 +671,6 @@
 
         const lunarBirthdayToSolar = { 2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02", 2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07", 2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10", 2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16", 2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19", 2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" };
         
-        // 🌟 명언 리스트 🌟
         const fatherQuotes = [
             { text: "당신이 할 수 있다고 믿든, 할 수 없다고 믿든, 믿는 대로 될 것이다.", author: "헨리 포드" },
             { text: "성공의 비결은 단 한 가지, 잘할 수 있는 일에 광적으로 집중하는 것이다.", author: "톰 모나한" },
@@ -688,14 +681,14 @@
             { text: "겨울이 오면 봄이 멀지 않으리.", author: "퍼시 비시 셸리" },
             { text: "바람이 불지 않을 때 바람개비를 돌리는 방법은, 앞으로 달려나가는 것뿐이다.", author: "데일 카네기" },
             { text: "작은 기회로부터 종종 위대한 업적이 시작된다.", author: "데모스테네스" },
-            { text: "우리는 길목에 서 있었다.", author: "최태원" }, // 🌟 최태원 명언 적용 완료 🌟
+            { text: "우리는 길목에 서 있었다.", author: "최태원" },
             { text: "위대한 떡갈나무도 작은 도토리에서부터 시작되었다.", author: "속담" },
             { text: "길이 없으면 길을 찾아라. 찾아도 없으면 길을 만들어라.", author: "정주영 회장" },
             { text: "비관론자는 모든 기회에서 어려움을 찾아내고, 낙관론자는 모든 어려움에서 기회를 찾아낸다.", author: "윈스턴 처칠" },
             { text: "나만이 내 인생을 바꿀 수 있다. 아무도 날 대신해 해줄 수 없다.", author: "캐럴 버넷" },
             { text: "매일 아침 당신에게는 두 가지 선택권이 있다. 그저 그런 하루를 보낼 것인가, 위대한 하루를 만들 것인가.", author: "작자 미상" },
             { text: "희망은 볼 수 없는 것을 보고, 만져질 수 없는 것을 느끼며, 불가능한 것을 이룬다.", author: "헬렌 켈러" },
-            { text: "지금의 당신을 만든 것은 과거의 선택들이고, 미래의 당신을 만드는 것은 지금의 선택이다.", author: "작자 미상" },
+            { text: "지금의 당신을 만든 것은 과거의 선택들이고, 미래의 당신을 만드는 복병은 지금의 선택이다.", author: "작자 미상" },
             { text: "인생은 폭풍우가 지나가기를 기다리는 것이 아니라, 빗속에서 춤추는 법을 배우는 것이다.", author: "비비안 그린" },
             { text: "성공으로 가는 길은 항상 공사 중이다.", author: "릴리 톰린" },
             { text: "행복의 문 하나가 닫히면 다른 문이 열린다. 종종 우리는 닫힌 문만 바라보느라 열린 문을 보지 못한다.", author: "헬렌 켈러" },
