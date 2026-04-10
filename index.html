@@ -124,7 +124,7 @@
         .stock-item.active { border-color: var(--accent-color); box-shadow: 0 0 10px rgba(231, 76, 60, 0.3); }
         .stock-item-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; }
 
-        /* 🌟 PC버전 눈치 방지용 미니 차트 🌟 */
+        /* 🌟 PC버전 눈치 방지용 미니 차트 */
         #chart-container { height: 260px; width: 60%; margin-bottom: 20px; transition: 0.3s; }
         
         .company-news-area { flex-grow: 0; margin-bottom: 20px; }
@@ -311,7 +311,7 @@
 
     <script>
         let isDarkMode = false;
-        let isExchangeVisible = true; // 아래 초기화 로직에서 재설정됨
+        let isExchangeVisible = true; 
         let currentTab = 'it';
         let currentActiveStock = null;
         
@@ -330,9 +330,16 @@
             document.getElementById('current-time').innerText = "기준: " + now.toLocaleString('ko-KR', options);
         }
 
+        // 🌟 [수정완료] 메모장 처음 로딩 시 맨 아래로 자동 스크롤 🌟
         const memoPad = document.getElementById('memo-pad');
         memoPad.value = localStorage.getItem('daddy_daily_memo') || '';
-        memoPad.addEventListener('input', () => { localStorage.setItem('daddy_daily_memo', memoPad.value); });
+        
+        // 데이터 불러온 직후 스크롤 바닥으로 고정!
+        memoPad.scrollTop = memoPad.scrollHeight;
+
+        memoPad.addEventListener('input', () => { 
+            localStorage.setItem('daddy_daily_memo', memoPad.value); 
+        });
 
         function addTodayDateToMemo() {
             const now = new Date();
@@ -342,7 +349,8 @@
             
             memoPad.value = memoPad.value + (memoPad.value.endsWith('\n') ? '' : '\n') + stamp;
             localStorage.setItem('daddy_daily_memo', memoPad.value);
-            memoPad.focus(); memoPad.scrollTop = memoPad.scrollHeight; 
+            memoPad.focus(); 
+            memoPad.scrollTop = memoPad.scrollHeight; 
         }
 
         function switchTab(tabName) {
@@ -464,7 +472,7 @@
             fetch(apiUrl).then(res => res.json()).then(data => {
                 if(data.status !== "ok") throw new Error("API 오류");
                 const articles = data.items;
-                if(!articles || articles.length === 0) { listEl.innerHTML = '<li>관련 최신 뉴스가 없습니다.</li>'; return; }
+                if(!articles || articles.length === 0) { listEl.innerHTML = '<li>관련 뉴스가 없습니다.</li>'; return; }
                 
                 if(listElementId === 'global-news-list') {
                     allGlobalNews = articles; 
@@ -717,13 +725,11 @@
             quoteCard.classList.remove('birthday-mode'); textEl.style.fontWeight = "normal"; textEl.style.fontSize = "1.3em"; textEl.innerText = `"${selectedQuote.text}"`; authorEl.innerText = `- ${selectedQuote.author} -`;
         }
 
-        // 🌟 [추가/수정] PC에서 접속 시 기본적으로 환율창을 숨김 처리 (모바일은 유지) 🌟
         document.addEventListener("DOMContentLoaded", () => {
             updateTime();
             setInterval(updateTime, 1000);
             displayDailyQuote(); 
             
-            // 화면 가로가 1100px 보다 크면 (PC 화면이면) 시세창을 닫아둡니다.
             if (window.innerWidth > 1100) {
                 isExchangeVisible = false;
                 document.getElementById('exchange-container').classList.add('hidden');
