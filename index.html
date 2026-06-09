@@ -175,7 +175,7 @@
         .quote-text { font-size: 1.3em; line-height: 1.6; margin-bottom: 15px; transition: 0.3s; color: #111; }
         .quote-author { font-size: 1.1em; color: #555; font-weight: bold; transition: 0.3s; }
 
-        /* 💖 하트 버튼 컨테이너 */
+        /* 💖 하트 버튼 컨테이너 및 개선사항 제보 영역 */
         .heart-btn-container { text-align: center; margin-top: 50px; margin-bottom: 80px; width: 100%; }
         .heart-send-btn {
             display: inline-block; padding: 18px 40px; background-color: var(--heart-color); color: white; 
@@ -183,6 +183,25 @@
         }
         .heart-send-btn:disabled { background-color: #bbb; box-shadow: none; cursor: default; }
         .heart-send-btn:hover:not(:disabled) { transform: scale(1.05); }
+
+        /* 🌟 신규: 아빠의 개선 사항 제보 창 디자인 🌟 */
+        .feedback-section { 
+            margin-top: 40px; padding-top: 25px; border-top: 2px dashed var(--border-color); 
+            display: flex; flex-direction: column; align-items: center; gap: 12px; 
+        }
+        .feedback-section h4 { margin: 0; color: var(--text-color); font-size: 1.1em; }
+        #feedback-msg { 
+            width: 90%; max-width: 450px; padding: 12px 20px; border: 2px solid var(--border-color); 
+            border-radius: 20px; font-size: 1em; background-color: var(--bg-color); color: var(--text-color); 
+            text-align: center; outline: none; transition: 0.3s; font-family: inherit; 
+        }
+        #feedback-msg:focus { border-color: var(--semi-color); background-color: var(--card-bg); }
+        .feedback-send-btn { 
+            background-color: var(--text-color); color: var(--bg-color); border: none; padding: 10px 30px; 
+            border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.2s; font-size: 1em; 
+        }
+        .feedback-send-btn:hover:not(:disabled) { opacity: 0.8; transform: scale(1.05); }
+        .feedback-send-btn:disabled { background-color: #bbb; cursor: default; }
 
         /* ✨ 하트 애니메이션 효과 */
         .heart-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 99999; display: none; }
@@ -300,6 +319,12 @@
             
             <div class="heart-btn-container">
                 <button class="heart-send-btn" id="heart-send-btn" onclick="sendHeartToDaughter()">💖 예쁜 딸에게 하트 보내기</button>
+                
+                <div class="feedback-section">
+                    <h4>💡 딸에게 개선 사항 제보하기</h4>
+                    <input type="text" id="feedback-msg" placeholder="추가하고 싶은 기능이나 수정 사항을 적어주세요!" autocomplete="off">
+                    <button class="feedback-send-btn" id="feedback-send-btn" onclick="sendFeedbackToDaughter()">🚀 제보 전송</button>
+                </div>
             </div>
         </div>
     </div> 
@@ -640,7 +665,7 @@
 
             if (realHeartCount > 0 && realHeartCount % 100 === 0) showGiantHeart(realHeartCount);
 
-           const sweetMessages = [
+            const sweetMessages = [
                 "💖 [아빠표 응원 배달] 우리 예쁜 딸, 밥은 잘 먹고 있지? 아빠가 대시보드 보다가 딸 생각나서 하트 하나 꾹 남긴다! 사랑한다! 💌",
                 "💖 [아빠의 자랑] 딸내미가 만들어준 대시보드 덕에 아빠는 매일매일 스마트해지는 기분이야! 우리 딸이 최고다! 아빠가 많이 사랑해! 👍💕",
                 "💖 [사랑 듬뿍 하트] 일하다가 지칠 때 우리 딸 생각하면 호랑이 기운이 솟아나지! 아빠가 보내는 하트 받고 오늘 하루도 으랏차차 화이팅! 🐯💪",
@@ -652,6 +677,36 @@
 
             fetch(DISCORD_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `${finalMessage}\n(보낸 시간: ${new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})})` }) }).catch(e => console.log("전송 오류"));
             setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
+        }
+
+        // 🌟 신규: 아빠의 개선 사항 제보 전송 함수 🌟
+        function sendFeedbackToDaughter() {
+            const btn = document.getElementById('feedback-send-btn');
+            const msgInput = document.getElementById('feedback-msg');
+            const feedbackText = msgInput.value.trim();
+
+            if (!feedbackText) {
+                alert("제보할 내용을 먼저 적어주세요!");
+                return;
+            }
+
+            const originalText = btn.innerText;
+            btn.innerText = "✅ 제보 완료!";
+            btn.disabled = true;
+
+            const finalMessage = `🛠️ **[아빠의 대시보드 개선 제보!]**\n"${feedbackText}"`;
+
+            fetch(DISCORD_WEBHOOK_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ content: `${finalMessage}\n(제보 시간: ${new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})})` }) 
+            }).catch(e => console.log("전송 오류"));
+            
+            setTimeout(() => { 
+                btn.innerText = originalText; 
+                btn.disabled = false; 
+                msgInput.value = ""; 
+            }, 3000);
         }
 
         function showGiantHeart(count) {
@@ -672,7 +727,6 @@
 
         const lunarBirthdayToSolar = { 2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02", 2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07", 2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10", 2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16", 2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19", 2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" };
         
-        // 🌟 아버님을 위한 신규 동기부여 명언 31선 🌟
         const fatherQuotes = [
             { text: "성공의 가장 큰 비결은 결코 지치지 않는 것이다.", author: "알베르트 슈바이처" },
             { text: "우리가 할 수 있는 최선을 다할 때, 어떤 기적이 일어날지 아무도 모른다.", author: "헬렌 켈러" },
