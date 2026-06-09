@@ -28,6 +28,23 @@
             overflow-x: hidden;
         }
 
+        /* 📢 [신규] 업데이트 알림 배너 (맨 위 고정) */
+        .update-banner {
+            position: fixed;
+            top: 0; left: 0; width: 100%;
+            background-color: var(--accent-color);
+            color: white; text-align: center;
+            padding: 15px; font-weight: bold; font-size: 1.1em;
+            z-index: 9999999; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateY(-100%); /* 처음엔 화면 위로 숨겨둠 */
+        }
+        .update-banner.show {
+            transform: translateY(0); /* 업데이트 감지 시 스르륵 내려옴! */
+        }
+        .update-banner:hover { background-color: #c0392b; }
+
         /* 🚀 뉴스 전광판 */
         .news-ticker {
             background-color: var(--card-bg); padding: 10px 0; border-bottom: 2px solid var(--border-color);
@@ -177,6 +194,15 @@
 
         /* 💖 하트 버튼 컨테이너 및 개선사항 제보 영역 */
         .heart-btn-container { text-align: center; margin-top: 50px; margin-bottom: 80px; width: 100%; }
+        
+        /* 📝 아빠의 직접 입력 메시지창 디자인 */
+        #daddy-custom-msg {
+            width: 80%; max-width: 400px; padding: 15px 20px; border: 2px solid var(--border-color);
+            border-radius: 25px; font-size: 1.1em; background-color: var(--bg-color); color: var(--text-color);
+            text-align: center; outline: none; transition: 0.3s; font-family: inherit;
+        }
+        #daddy-custom-msg:focus { border-color: var(--heart-color); box-shadow: 0 0 10px rgba(216, 27, 96, 0.2); background-color: var(--card-bg); }
+        
         .heart-send-btn {
             display: inline-block; padding: 18px 40px; background-color: var(--heart-color); color: white; 
             font-weight: bold; font-size: 1.3em; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3); transition: all 0.3s ease;
@@ -223,6 +249,10 @@
     </style>
 </head>
 <body>
+
+    <div id="update-banner" class="update-banner" onclick="location.reload()">
+        📢 대시보드 업데이트가 있습니다! 여기를 눌러 최신 버전으로 새로고침 하세요.
+    </div>
 
     <div id="giant-heart-overlay">
         <div class="giant-heart-icon">💖</div>
@@ -318,7 +348,10 @@
             </div>
             
             <div class="heart-btn-container">
-                <button class="heart-send-btn" id="heart-send-btn" onclick="sendHeartToDaughter()">💖 예쁜 딸에게 하트 보내기</button>
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="daddy-custom-msg" placeholder="딸에게 남길 메시지가 있다면 적어주세요 (선택)" autocomplete="off">
+                </div>
+                <button class="heart-send-btn" id="heart-send-btn" onclick="sendHeartToDaughter()">💖 예쁜 딸에게 하트 & 메시지 보내기</button>
                 
                 <div class="feedback-section">
                     <h4>💡 딸에게 개선 사항 제보하기</h4>
@@ -335,6 +368,9 @@
     </div>
 
     <script>
+        // 🌟 [핵심] 대시보드 버전 (업데이트 하실 때마다 숫자를 올려주세요!) 🌟
+        const DASHBOARD_VERSION = "1.0";
+
         let isDarkMode = false;
         let isExchangeVisible = true; 
         let currentTab = 'it';
@@ -653,10 +689,14 @@
             document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 종합 시세창 숨기기" : "💱 종합 시세창 열기";
         });
 
+        // 🌟 [수정] 직접 입력한 메시지까지 보내주는 찐 양방향 소통 기능! 🌟
         function sendHeartToDaughter() {
             const btn = document.getElementById('heart-send-btn');
+            const msgInput = document.getElementById('daddy-custom-msg'); 
+            const customText = msgInput.value.trim(); 
+
             const originalText = btn.innerText;
-            btn.innerText = "✨ 하트 전송 완료!";
+            btn.innerText = "✨ 전송 완료!";
             btn.disabled = true;
 
             let realHeartCount = parseInt(localStorage.getItem('daddy_real_heart_count') || '7');
@@ -672,10 +712,23 @@
                 "💖 [깜짝 선물] 띠링~ 아빠의 사랑이 도착했습니다! 우리 딸, 세상에서 제일 많이 웃는 하루 보내길 바랄게! 아빠가 항상 든든하게 응원한다! 🥰✨"
             ];
             
-            let finalMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
+            let finalMessage = "";
+
+            if (customText !== "") {
+                finalMessage = `💌 **[아빠의 직접 쓴 메시지 도착!]**\n"${customText}"\n`;
+                msgInput.value = ""; 
+            } else {
+                finalMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
+            }
+
             finalMessage += `\n*(딸에게 보낸 ${realHeartCount}번째 사랑입니다!)*`;
 
-            fetch(DISCORD_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: `${finalMessage}\n(보낸 시간: ${new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})})` }) }).catch(e => console.log("전송 오류"));
+            fetch(DISCORD_WEBHOOK_URL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ content: `${finalMessage}\n(보낸 시간: ${new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'})})` }) 
+            }).catch(e => console.log("전송 오류"));
+            
             setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
         }
 
@@ -724,6 +777,20 @@
                 container.appendChild(heart); setTimeout(() => { heart.remove(); }, 7000); 
             }, 400); 
         }
+
+        // 🌟 스마트 업데이트 확인 기능 🌟
+        function checkForUpdates() {
+            fetch(window.location.href, { cache: "no-store" })
+                .then(res => res.text())
+                .then(html => {
+                    const match = html.match(/const DASHBOARD_VERSION = "([^"]+)";/);
+                    if (match && match[1] !== DASHBOARD_VERSION) {
+                        document.getElementById('update-banner').classList.add('show');
+                    }
+                })
+                .catch(e => console.log("업데이트 확인 중 오류 (무시)"));
+        }
+        setInterval(checkForUpdates, 600000); // 10분마다 몰래 체크
 
         const lunarBirthdayToSolar = { 2026: "03-16", 2027: "03-05", 2028: "02-22", 2029: "03-12", 2030: "03-02", 2031: "02-19", 2032: "03-09", 2033: "02-27", 2034: "03-18", 2035: "03-07", 2036: "02-24", 2037: "03-14", 2038: "03-03", 2039: "02-20", 2040: "03-10", 2041: "02-28", 2042: "02-18", 2043: "03-09", 2044: "02-26", 2045: "03-16", 2046: "03-05", 2047: "02-22", 2048: "03-12", 2049: "03-01", 2050: "02-19", 2051: "03-10", 2052: "02-28", 2053: "03-18", 2054: "03-07", 2055: "02-24", 2056: "03-13" };
         
