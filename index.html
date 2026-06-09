@@ -28,7 +28,7 @@
             overflow-x: hidden;
         }
 
-        /* 📢 [신규] 업데이트 알림 배너 (맨 위 고정) */
+        /* 📢 업데이트 알림 배너 (맨 위 고정) */
         .update-banner {
             position: fixed;
             top: 0; left: 0; width: 100%;
@@ -38,10 +38,10 @@
             z-index: 9999999; cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform: translateY(-100%); /* 처음엔 화면 위로 숨겨둠 */
+            transform: translateY(-100%); 
         }
         .update-banner.show {
-            transform: translateY(0); /* 업데이트 감지 시 스르륵 내려옴! */
+            transform: translateY(0); 
         }
         .update-banner:hover { background-color: #c0392b; }
 
@@ -195,14 +195,6 @@
         /* 💖 하트 버튼 컨테이너 및 개선사항 제보 영역 */
         .heart-btn-container { text-align: center; margin-top: 50px; margin-bottom: 80px; width: 100%; }
         
-        /* 📝 아빠의 직접 입력 메시지창 디자인 */
-        #daddy-custom-msg {
-            width: 80%; max-width: 400px; padding: 15px 20px; border: 2px solid var(--border-color);
-            border-radius: 25px; font-size: 1.1em; background-color: var(--bg-color); color: var(--text-color);
-            text-align: center; outline: none; transition: 0.3s; font-family: inherit;
-        }
-        #daddy-custom-msg:focus { border-color: var(--heart-color); box-shadow: 0 0 10px rgba(216, 27, 96, 0.2); background-color: var(--card-bg); }
-        
         .heart-send-btn {
             display: inline-block; padding: 18px 40px; background-color: var(--heart-color); color: white; 
             font-weight: bold; font-size: 1.3em; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 15px rgba(216, 27, 96, 0.3); transition: all 0.3s ease;
@@ -210,7 +202,7 @@
         .heart-send-btn:disabled { background-color: #bbb; box-shadow: none; cursor: default; }
         .heart-send-btn:hover:not(:disabled) { transform: scale(1.05); }
 
-        /* 🌟 신규: 아빠의 개선 사항 제보 창 디자인 🌟 */
+        /* 🌟 아빠의 개선 사항 제보 창 디자인 🌟 */
         .feedback-section { 
             margin-top: 40px; padding-top: 25px; border-top: 2px dashed var(--border-color); 
             display: flex; flex-direction: column; align-items: center; gap: 12px; 
@@ -348,10 +340,7 @@
             </div>
             
             <div class="heart-btn-container">
-                <div style="margin-bottom: 15px;">
-                    <input type="text" id="daddy-custom-msg" placeholder="딸에게 남길 메시지가 있다면 적어주세요 (선택)" autocomplete="off">
-                </div>
-                <button class="heart-send-btn" id="heart-send-btn" onclick="sendHeartToDaughter()">💖 예쁜 딸에게 하트 & 메시지 보내기</button>
+                <button class="heart-send-btn" id="heart-send-btn" onclick="sendHeartToDaughter()">💖 예쁜 딸에게 하트 보내기</button>
                 
                 <div class="feedback-section">
                     <h4>💡 딸에게 개선 사항 제보하기</h4>
@@ -368,7 +357,7 @@
     </div>
 
     <script>
-        // 🌟 [핵심] 대시보드 버전 (업데이트 하실 때마다 숫자를 올려주세요!) 🌟
+        // 🌟 대시보드 버전 (업데이트 하실 때마다 숫자를 올려주세요!) 🌟
         const DASHBOARD_VERSION = "1.0";
 
         let isDarkMode = false;
@@ -689,14 +678,11 @@
             document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 종합 시세창 숨기기" : "💱 종합 시세창 열기";
         });
 
-        // 🌟 [수정] 직접 입력한 메시지까지 보내주는 찐 양방향 소통 기능! 🌟
+        // 🌟 수정: 입력창 빼고 오리지널 랜덤 메시지 발송으로 복구 🌟
         function sendHeartToDaughter() {
             const btn = document.getElementById('heart-send-btn');
-            const msgInput = document.getElementById('daddy-custom-msg'); 
-            const customText = msgInput.value.trim(); 
-
             const originalText = btn.innerText;
-            btn.innerText = "✨ 전송 완료!";
+            btn.innerText = "✨ 하트 전송 완료!";
             btn.disabled = true;
 
             let realHeartCount = parseInt(localStorage.getItem('daddy_real_heart_count') || '7');
@@ -712,15 +698,7 @@
                 "💖 [깜짝 선물] 띠링~ 아빠의 사랑이 도착했습니다! 우리 딸, 세상에서 제일 많이 웃는 하루 보내길 바랄게! 아빠가 항상 든든하게 응원한다! 🥰✨"
             ];
             
-            let finalMessage = "";
-
-            if (customText !== "") {
-                finalMessage = `💌 **[아빠의 직접 쓴 메시지 도착!]**\n"${customText}"\n`;
-                msgInput.value = ""; 
-            } else {
-                finalMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
-            }
-
+            let finalMessage = sweetMessages[Math.floor(Math.random() * sweetMessages.length)];
             finalMessage += `\n*(딸에게 보낸 ${realHeartCount}번째 사랑입니다!)*`;
 
             fetch(DISCORD_WEBHOOK_URL, { 
@@ -732,7 +710,7 @@
             setTimeout(() => { btn.innerText = originalText; btn.disabled = false; }, 3000);
         }
 
-        // 🌟 신규: 아빠의 개선 사항 제보 전송 함수 🌟
+        // 🌟 아빠의 개선 사항 제보 전송 함수 🌟
         function sendFeedbackToDaughter() {
             const btn = document.getElementById('feedback-send-btn');
             const msgInput = document.getElementById('feedback-msg');
