@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <script>
-        const DASHBOARD_VERSION = "1.1.1"; // (예: 1.2, 1.3 등으로 수정)
+        const DASHBOARD_VERSION = "1.0.1"; // 1.0.1 로 패치 업데이트 완료!
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -31,22 +31,22 @@
             overflow-x: hidden;
         }
 
-        /* 📢 업데이트 알림 배너 (맨 위 고정) */
+        /* 📢 업데이트 알림 배너 (눈이 편안한 차분한 톤으로 변경!) */
         .update-banner {
             position: fixed;
             top: 0; left: 0; width: 100%;
-            background-color: var(--accent-color);
+            background-color: #607D8B; /* 차분한 블루 그레이 톤 */
             color: white; text-align: center;
             padding: 15px; font-weight: bold; font-size: 1.1em;
             z-index: 9999999; cursor: pointer;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), background-color 0.3s;
             transform: translateY(-100%); 
         }
         .update-banner.show {
             transform: translateY(0); 
         }
-        .update-banner:hover { background-color: #c0392b; }
+        .update-banner:hover { background-color: #455A64; } /* 호버 시 조금 더 어두운 톤 */
 
         /* 🚀 뉴스 전광판 */
         .news-ticker {
@@ -678,7 +678,6 @@
             document.getElementById('toggle-exchange-btn').innerText = isExchangeVisible ? "💱 종합 시세창 숨기기" : "💱 종합 시세창 열기";
         });
 
-        // 🌟 수정: 입력창 빼고 오리지널 랜덤 메시지 발송으로 복구 🌟
         function sendHeartToDaughter() {
             const btn = document.getElementById('heart-send-btn');
             const originalText = btn.innerText;
@@ -780,7 +779,7 @@
             { text: "무언가를 시작하기에 훌륭할 필요는 없지만, 훌륭해지기 위해서는 반드시 시작해야 한다.", author: "지그 지글러" },
             { text: "기운과 끈기는 모든 것을 이겨낸다.", author: "벤저민 프랭클린" },
             { text: "당신이 할 수 있는 가장 위대한 모험은 당신이 꿈꾸던 삶을 사는 것이다.", author: "오프라 윈프리" },
-            { text: "인생에서 가장 큰 영광은 넘어지지 않는 것에 있는 것이 아니라 매번 일어선다는 데 있다.", author: "넬슨 만델라" },
+            { text: "인생에서 가장 큰 영광은 넘어지지 않는 것에 있는 가장 큰 이유는 매번 일어선다는 데 있다.", author: "넬슨 만델라" },
             { text: "성공은 최종적인 것이 아니며, 실패는 치명적인 것이 아니다. 중요한 것은 계속하려는 용기이다.", author: "윈스턴 처칠" },
             { text: "가장 큰 위험은 어떤 위험도 감수하지 않는 것이다. 빠르게 변하는 세상에서 실패가 보장된 유일한 전략은 도전을 피하는 것이다.", author: "마크 저커버그" },
             { text: "열정을 잃지 않고 실패에서 실패로 걸어가는 것이 성공이다.", author: "윈스턴 처칠" },
